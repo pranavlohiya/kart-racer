@@ -50,7 +50,6 @@
   .btn:hover { background: #ffdf33; transform: skew(-5deg) translateY(2px); box-shadow: 0 6px 0 #c97a00, 0 10px 15px rgba(0,0,0,0.3); }
   .btn:active { transform: skew(-5deg) translateY(8px); box-shadow: 0 0 0 #c97a00, 0 2px 5px rgba(0,0,0,0.3); }
 
-  /* MP Status badge */
   #mpStatusBadge { display:inline-block; margin-top:0.8rem; padding: 0.4rem 1rem; border-radius: 20px; font-size:0.85rem; font-weight:bold; letter-spacing:1px; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.4); color: #fff; }
   #mpStatusBadge.connected { border-color: var(--b); background: rgba(67,176,71,0.3); }
   #mpStatusBadge.error { border-color: var(--p); background: rgba(229,37,33,0.3); }
@@ -63,7 +62,6 @@
   #hudLN { font-family: 'Arial Black', Impact, sans-serif; font-size: 2rem; color: white; text-shadow: 2px 2px 0 var(--b); }
   #hudTM { font-size: 1.4rem; letter-spacing: 2px; min-width: 110px; font-weight: bold; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.5); }
   
-  /* MP player count badge in HUD */
   #hudMP { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.6); border: 2px solid var(--b); border-radius: 10px; padding: 6px 14px; font-size: 0.85rem; font-weight: bold; color: #fff; display: none; }
   
   #hudSpd { position: absolute; bottom: 30px; left: 30px; }
@@ -165,7 +163,6 @@
   </div>
 </div>
 
-<!-- MULTIPLAYER MENU -->
 <div id="sMultiplayer" class="screen hidden">
   <div class="box">
     <h1 class="gtitle" style="font-size:3rem; margin-bottom: 0.5rem;"><span>MULTIPLAYER</span></h1>
@@ -178,7 +175,6 @@
                 <input type="text" id="joinCode" class="mp-input" placeholder="ENTER ROOM CODE" maxlength="6"/>
                 <button class="btn" id="btnJoinRoom" style="margin:0; padding: 0 2rem; height: auto;">JOIN</button>
             </div>
-            <!-- BUG FIX: Laps selector available in MP lobby too -->
             <div class="opts" style="margin-top:1.2rem; padding-top:1rem;">
               <label>LAPS
                 <select id="uiLapsMP">
@@ -200,7 +196,7 @@
             <div id="playerListUI" style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:8px; justify-content:center;"></div>
         </div>
         <div style="margin-top:1rem;">
-            <button class="btn hidden" id="btnHostSelectTrack" style="width:100%;">SELECT TRACK & START</button>
+            <button class="btn hidden" id="btnHostSelectTrack" style="width:100%;">SELECT TRACK &amp; START</button>
             <p id="waitingForHostMsg" style="color:rgba(255,255,255,0.7); margin-top:0.8rem; font-size:0.9rem; display:none;">Waiting for host to select a track...</p>
         </div>
         <button class="btn" id="btnLeaveRoom" style="background:#888; font-size:1rem; padding: 0.8rem 2rem; box-shadow: 0 4px 0 #555; margin-top:0.5rem;">LEAVE ROOM</button>
@@ -208,7 +204,6 @@
   </div>
 </div>
 
-<!-- TRACK SELECTION -->
 <div id="sMap" class="screen hidden">
   <div class="box">
     <h1 class="gtitle" style="font-size:3rem; margin-bottom: 0.5rem;"><span>SELECT</span><br/><em>TRACK</em></h1>
@@ -238,7 +233,6 @@
     <div><span class="hl">TIME</span><span id="hudTM">0:00.000</span></div>
   </div>
   
-  <!-- MP player count indicator -->
   <div id="hudMP">🌐 <span id="hudMPCount">1</span> PLAYERS</div>
   
   <div id="hudSpd">
@@ -293,13 +287,13 @@ function gel(id){return document.getElementById(id)}
 function rnd(a,b){return a+(b-a)*Math.random()}
 
 // ══════════════════════════════════════════════════════════════
-//  MULTIPLAYER MANAGER  (all bugs fixed)
+//  MULTIPLAYER MANAGER
 // ══════════════════════════════════════════════════════════════
 let isMultiplayer = false;
 let mpSocket = null;
 let mpRoomCode = '';
 let mpIsHost = false;
-let mpMyIndex = 0;           // FIX: guaranteed set before buildGame()
+let mpMyIndex = 0;
 let mpPlayerCount = 1;
 let remoteRacers = {};
 
@@ -315,29 +309,25 @@ class RemoteRacer {
         this.target = { p: startPos.pos.clone(), h: startPos.angle };
     }
     update(dt) {
-        // Smooth interpolation toward server position
         this.body.p.lerp(this.target.p, clamp(dt * 15, 0, 1));
         let hd = adiff(this.target.h, this.body.h);
         this.body.h += hd * clamp(dt * 15, 0, 1);
         this.body.steerVal = lerp(this.body.steerVal, this.target.steer || 0, 0.2);
         this.vis.update(this.body, dt);
     }
-    progress() { return 0; }   // remotes don't affect local race position
+    progress() { return 0; }
     destroy(scene) { this.vis.remove(scene); }
 }
 
 const MP = {
-    _initialized: false,
-
     init() {
-        if (this._initialized) return;
-        this._initialized = true;
+        if (mpSocket && (mpSocket.connected || mpSocket.connecting)) return;
 
-        // FIX: Use polling fallback in case websocket is blocked
         mpSocket = io("https://kart-racer-server.onrender.com", {
             transports: ["websocket", "polling"],
             reconnectionAttempts: 5,
-            timeout: 10000
+            timeout: 10000,
+            autoConnect: true
         });
 
         mpSocket.on('connect', () => {
@@ -357,21 +347,21 @@ const MP = {
             console.warn("Disconnected:", reason);
             const badge = gel('mpStatusBadge');
             if (badge) { badge.textContent = '● DISCONNECTED'; badge.className = 'error'; }
-            // FIX: If disconnected mid-race, show a message instead of silently breaking
             if (gState === 'RACE') {
                 UI.flash('⚠ CONNECTION LOST', 0xff4444, 5000);
             }
         });
 
-        // ── Room events ───────────────────────────────────────
+        // ── Room events ─────────────────────────────────────
         mpSocket.on('room_created', (data) => {
             mpRoomCode = data.code;
             mpIsHost = true;
-            mpPlayerCount = data.players ? data.players.length : 1;
-            UI.showMPLobbyRoom(data.code, true, mpPlayerCount, data.players || [mpSocket.id]);
+            isMultiplayer = true; // MUST set to true so host starts MP game
+            const players = data.players || [mpSocket.id];
+            mpPlayerCount = players.length;
+            UI.showMPLobbyRoom(data.code, true, mpPlayerCount, players);
         });
 
-        // FIX: 'room_error' was never handled → user got no feedback
         mpSocket.on('room_error', (data) => {
             UI.mpError(data.message || "Room error. Try again.");
         });
@@ -379,29 +369,30 @@ const MP = {
         mpSocket.on('joined_room', (data) => {
             mpRoomCode = data.code;
             mpIsHost = false;
-            mpPlayerCount = data.players ? data.players.length : 2;
-            UI.showMPLobbyRoom(data.code, false, mpPlayerCount, data.players || []);
+            isMultiplayer = true; // MUST set to true so client properly responds
+            const players = data.players || [];
+            mpPlayerCount = players.length;
+            UI.showMPLobbyRoom(data.code, false, mpPlayerCount, players);
         });
 
-        // FIX: 'join_error' was never handled → silent failure on bad code
         mpSocket.on('join_error', (data) => {
             UI.mpError(data.message || "Room not found. Check the code.");
         });
 
         mpSocket.on('player_joined', (data) => {
-            // FIX: old code passed (players) array directly, now handle both forms
-            const players = Array.isArray(data) ? data : (data.players || []);
-            mpPlayerCount = players.length;
+            const players = Array.isArray(data) ? data :
+                            (data && Array.isArray(data.players) ? data.players : []);
+            mpPlayerCount = players.length || mpPlayerCount + 1;
             UI.updateLobbyPlayers(mpPlayerCount, players);
         });
 
         mpSocket.on('player_left', (data) => {
-            const players = Array.isArray(data) ? data : (data.players || []);
-            mpPlayerCount = players.length;
+            const players = Array.isArray(data) ? data :
+                            (data && Array.isArray(data.players) ? data.players : []);
+            mpPlayerCount = Math.max(1, players.length || mpPlayerCount - 1);
             UI.updateLobbyPlayers(mpPlayerCount, players);
 
-            // Remove their kart from scene
-            const leftId = data.id || null;
+            const leftId = (data && !Array.isArray(data)) ? data.id : null;
             if (leftId && remoteRacers[leftId]) {
                 remoteRacers[leftId].destroy(scene);
                 delete remoteRacers[leftId];
@@ -410,23 +401,19 @@ const MP = {
             UI.updateMPHud(Object.keys(remoteRacers).length + 1);
         });
 
-        // ── Race start ────────────────────────────────────────
+        // ── Race start ───────────────────────────────────────
         mpSocket.on('race_start', (data) => {
             console.log("🏁 RACE START received", data);
 
-            // FIXED: fallback to index 0 instead of aborting
             if (!data.spawns || data.spawns[mpSocket.id] === undefined) {
-                console.warn("Spawn missing, fallback to 0");
+                console.warn("Spawn index missing — defaulting to 0");
                 mpMyIndex = 0;
             } else {
                 mpMyIndex = data.spawns[mpSocket.id];
             }
 
-            mpPlayerCount = data.playerCount || Object.keys(data.spawns).length;
-
-            // ADDED: disable bots in multiplayer
-            SETTINGS_AI_COUNT = 0;
-
+            mpPlayerCount = data.playerCount || Object.keys(data.spawns || {}).length || 1;
+            SETTINGS_AI_COUNT = 0;   // no bots in MP
             isMultiplayer = true;
             SETTINGS_MAP = (data.map !== undefined) ? data.map : 0;
             SETTINGS_LAPS = data.laps || 3;
@@ -434,32 +421,28 @@ const MP = {
             console.log(`My index: ${mpMyIndex}, Map: ${SETTINGS_MAP}, Laps: ${SETTINGS_LAPS}`);
 
             // Hide all UI screens
-            gel('sMultiplayer').classList.add('hidden');
-            gel('sMap').classList.add('hidden');
-            gel('sMenu').classList.add('hidden');
+            ['sMultiplayer','sMap','sMenu'].forEach(id => {
+                let el = gel(id);
+                if (el) {
+                    el.style.opacity = 0;
+                    setTimeout(() => el.classList.add('hidden'), 400);
+                }
+            });
 
             AudioSys.init();
             teardown();
-
-            // ADDED: clear old remote racers before rebuilding
             remoteRacers = {};
-
             buildGame();
             startRace();
         });
 
-        // ── Position sync ─────────────────────────────────────
+        // ── Position sync ────────────────────────────────────
         mpSocket.on('sync', (data) => {
             if (!isMultiplayer || !player) return;
-
-            // REMOVED: broken cleanup that caused random player disappearances.
-            // Players are ONLY removed in 'player_left' event.
-
             const starts = Track.startPositions();
 
             for (let id in data) {
                 if (id === mpSocket.id) continue;
-
                 const pd = data[id];
                 if (!pd) continue;
 
@@ -479,55 +462,47 @@ const MP = {
         });
     },
 
-    // FIX: Ensure socket connects before emitting, avoid double-connect race
-    _withConnect(cb) {
-        this.init();
-        if (mpSocket.connected) { cb(); return; }
-        mpSocket.once('connect', cb);
-        if (!mpSocket.connecting) mpSocket.connect();
-    },
-
     createRoom() {
-        this._withConnect(() => {
+        this.init();
+        const tryCreate = () => {
             const laps = parseInt(gel('uiLapsMP').value) || 3;
             mpSocket.emit('create_room', { laps });
-        });
+        };
+        if (mpSocket.connected) { tryCreate(); return; }
+        mpSocket.once('connect', tryCreate);
     },
 
     joinRoom(code) {
         if (!code || code.length < 2) { UI.mpError("Enter a valid room code."); return; }
-        this._withConnect(() => {
+        this.init();
+        const tryJoin = () => {
             mpSocket.emit('join_room', code.toUpperCase().trim());
-        });
+        };
+        if (mpSocket.connected) { tryJoin(); return; }
+        mpSocket.once('connect', tryJoin);
     },
 
-    // FIX: Host track selection now also passes correct laps from MP lap selector
     hostSelectsMapAndStarts(mapId) {
         if (!mpIsHost || !mpSocket || !mpSocket.connected) return;
         const laps = parseInt(gel('uiLapsMP').value) || 3;
         mpSocket.emit('start_race', { map: mapId, laps });
     },
 
-    // FIX: Was never disconnecting on leave → socket stayed alive
     leaveRoom() {
-        if (mpSocket && mpSocket.connected) {
-            mpSocket.emit('leave_room');
+        if (mpSocket) {
+            mpSocket.removeAllListeners();
             mpSocket.disconnect();
+            mpSocket = null;
         }
         mpRoomCode = '';
         mpIsHost = false;
         mpMyIndex = 0;
         isMultiplayer = false;
-        this._initialized = false;
-        mpSocket = null;
+        mpPlayerCount = 1;
     },
 
-    // FIXED: rate-limited sendSync — 20 FPS network sync max
     sendSync() {
         if (!mpSocket || !mpSocket.connected || !isMultiplayer || !player) return;
-        const now = performance.now();
-        if (now - lastSync < 50) return; // 20 FPS network sync
-        lastSync = now;
         mpSocket.emit('sync', {
             p: { x: player.body.p.x, y: player.body.p.y, z: player.body.p.z },
             h: player.body.h,
@@ -730,11 +705,13 @@ class Body{
 
 function resolveCollisions(bodies){
   for(let i=0;i<bodies.length;i++)for(let j=i+1;j<bodies.length;j++){
-    const a=bodies[i],b=bodies[j],dx=b.p.x-a.p.x,dz=b.p.z-a.p.z,d2=dx*dx+dz*dz,md=PH.KR*2;
+    const a=bodies[i],b=bodies[j];
+    if(a.isRemote||b.isRemote)continue;
+    const dx=b.p.x-a.p.x,dz=b.p.z-a.p.z,d2=dx*dx+dz*dz,md=PH.KR*2;
     if(d2<md*md&&d2>.01){
       const d=Math.sqrt(d2),nx=dx/d,nz=dz/d,rv=(b.v.x-a.v.x)*nx+(b.v.z-a.v.z)*nz;
-      if(rv<0){const im=rv*.6;if(!a.isRemote){a.v.x+=im*nx;a.v.z+=im*nz;}if(!b.isRemote){b.v.x-=im*nx;b.v.z-=im*nz;}}
-      const push=(md-d)*.5+.01;if(!a.isRemote){a.p.x-=nx*push;a.p.z-=nz*push;}if(!b.isRemote){b.p.x+=nx*push;b.p.z+=nz*push;}
+      if(rv<0){const im=rv*.6;a.v.x+=im*nx;a.v.z+=im*nz;b.v.x-=im*nx;b.v.z-=im*nz;}
+      const push=(md-d)*.5+.01;a.p.x-=nx*push;a.p.z-=nz*push;b.p.x+=nx*push;b.p.z+=nz*push;
     }
   }
 }
@@ -823,18 +800,39 @@ class Racer{
       }
     }
   }
-  fireItem(all){
+  fireItem(allLocalRacers, allRemoteBodies){
     if(!this.item)return;
     const t=this.item;this.item=null;
     if(this.isPlayer){UI.setItem(null);}
     if(this.isPlayer)AudioSys.playItem();
     if(t==='boost'){this.body.addBoost(2.5);if(this.isPlayer)UI.flash('⚡ SPEED BOOST!',0xffcc00);Parts.spawnRing(this.body.p,0xff3333);}
     else if(t==='missile'){
+      const candidates = [...(allLocalRacers||[])];
+      const remotes = allRemoteBodies || [];
       let best=null,bd=Infinity;
-      for(const r of all){if(r===this||r.done||r.isRemote)continue;const relx=r.body.p.x-this.body.p.x,relz=r.body.p.z-this.body.p.z,dot=relx*this.body.fx+relz*this.body.fz;if(dot>0||!this.isPlayer){const d=relx*relx+relz*relz;if(d<bd){bd=d;best=r;}}}
+      for(const r of candidates){
+        if(r===this||r.done)continue;
+        const relx=r.body.p.x-this.body.p.x,relz=r.body.p.z-this.body.p.z;
+        const dot=relx*this.body.fx+relz*this.body.fz;
+        if(dot>0||!this.isPlayer){const d=relx*relx+relz*relz;if(d<bd){bd=d;best=r;}}
+      }
+      for(const rr of remotes){
+        const relx=rr.body.p.x-this.body.p.x,relz=rr.body.p.z-this.body.p.z;
+        const dot=relx*this.body.fx+relz*this.body.fz;
+        if(dot>0||!this.isPlayer){const d=relx*relx+relz*relz;if(d<bd){bd=d;best={body:rr.body,done:false,isPlayer:false,isRemote:true};}}
+      }
       const missile=new MissileProjectile(this.body,best,this._scene);
       const firer=this;
-      missile._onHit=function(hitPos){Parts.explode(hitPos);if(best&&!best.body.shield){const dx=best.body.p.x-firer.body.p.x,dz=best.body.p.z-firer.body.p.z,d=Math.sqrt(dx*dx+dz*dz)||1;best.body.hit(v3(dx/d*45,0,dz/d*45));if(best.isPlayer){UI.hitFlash();UI.flash('💥 HIT!',0xff2222);Cam.shake(1.5);}}else if(best&&best.body.shield&&best.isPlayer)UI.flash('🛡 BLOCKED!',0x3caaff);};
+      missile._onHit=function(hitPos){
+        Parts.explode(hitPos);
+        if(best&&!best.isRemote&&!best.body.shield){
+          const dx=best.body.p.x-firer.body.p.x,dz=best.body.p.z-firer.body.p.z,d=Math.sqrt(dx*dx+dz*dz)||1;
+          best.body.hit(v3(dx/d*45,0,dz/d*45));
+          if(best.isPlayer){UI.hitFlash();UI.flash('💥 HIT!',0xff2222);Cam.shake(1.5);}
+        } else if(best&&best.isPlayer&&best.body&&best.body.shield) {
+          UI.flash('🛡 BLOCKED!',0x3caaff);
+        }
+      };
       activeMissiles.push(missile);if(this.isPlayer)UI.flash('🚀 MISSILE FIRED!',0x3cff88);
     }else if(t==='shield'){this.body.addShield(8);if(this.isPlayer)UI.flash('🛡 SHIELD ACTIVE!',0x3caaff);}
   }
@@ -875,7 +873,7 @@ class AI{
     else{const ct=lerp(.3,.6,this.skill);if(turnSharpness>ct&&Math.abs(b.spd)>PH.MAX*.5){this.inp.throttle=0;this.inp.brake=clamp((turnSharpness-ct)*2,0,1);}else{this.inp.throttle=roadFrac<.2?.6:1;this.inp.brake=0;}}
     this.inp.useItem=false;
     if(r.item&&Math.random()<.03){if(r.item==='boost'&&turnSharpness<.2)this.inp.useItem=true;else if(r.item==='missile'&&distBehind>0)this.inp.useItem=true;else if(r.item==='shield')this.inp.useItem=true;}
-    if(this.inp.useItem)r.fireItem(all);
+    if(this.inp.useItem)r.fireItem(all,[]);
     if(!this._stP)this._stP=b.p.clone();
     if(Math.abs(b.spd)<5&&this.inp.throttle>0){this._stT+=dt;if(this._stT>1.2){this._revT=1;this._revDir=Math.random()>.5?-1:1;this._stT=0;}}else this._stT=0;
     b.step(this.inp,dt,Track.onRoad(b.p,r.spIdx));
@@ -987,7 +985,6 @@ const MMap=(()=>{
     ctx.closePath();ctx.strokeStyle='rgba(255,255,255,0.6)';ctx.lineWidth=8;ctx.stroke();ctx.strokeStyle='rgba(0,0,0,0.8)';ctx.lineWidth=4;ctx.stroke();
     const COLS=['#ff3333','#3388ff','#33ff44','#ff33ff','#ff8800','#00dddd','#ffdd00','#aa00ff'];
     for(const r of rc){const{x,y}=px(r.body.p.x,r.body.p.z);ctx.beginPath();ctx.arc(x,y,r.isPlayer?6:4,0,Math.PI*2);ctx.fillStyle=COLS[r.idx%COLS.length];ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();}
-    // FIX: Draw remote players on minimap too
     for(const r of extraRacers){const{x,y}=px(r.body.p.x,r.body.p.z);ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle=COLS[r.idx%COLS.length];ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();}
   }
   return{init,draw};
@@ -1005,7 +1002,6 @@ const UI=(()=>{
   function showMapSelect(){gel('sMap').classList.remove('hidden');setTimeout(()=>gel('sMap').style.opacity=1,10);}
   function hideMapSelect(){gel('sMap').style.opacity=0;setTimeout(()=>gel('sMap').classList.add('hidden'),400);}
 
-  // FIX: Completely reworked MP lobby UI functions
   function showMPLobby(){
       const el=gel('sMultiplayer');el.classList.remove('hidden');setTimeout(()=>el.style.opacity=1,10);
       gel('mpLobbySetup').classList.remove('hidden');
@@ -1035,12 +1031,12 @@ const UI=(()=>{
           if (mpIsHost) statusEl.textContent = `You are the HOST — ${count} player(s) in room`;
           else statusEl.textContent = `${count} player(s) in room`;
       }
-      // Show player slots
       const listEl = gel('playerListUI');
       if (listEl) {
           listEl.innerHTML = '';
-          const ids = playerIds || [];
-          for (let i = 0; i < Math.max(count, ids.length); i++) {
+          const ids = Array.isArray(playerIds) ? playerIds : [];
+          const displayCount = Math.max(count, ids.length);
+          for (let i = 0; i < displayCount; i++) {
               const chip = document.createElement('div');
               chip.style.cssText = 'padding:6px 14px; border-radius:20px; font-size:0.8rem; font-weight:bold; background:rgba(255,255,255,0.2); border:2px solid rgba(255,255,255,0.5); color:#fff;';
               const id = ids[i] || '?';
@@ -1052,11 +1048,9 @@ const UI=(()=>{
       }
   }
 
-  // FIX: mpError was missing entirely
   function mpError(msg) {
       const badge = gel('mpStatusBadge');
       if (badge) { badge.textContent = '⚠ ' + msg; badge.className = 'error'; }
-      // Flash temporary error below buttons
       let err = document.getElementById('mpErrorMsg');
       if (!err) {
           err = document.createElement('p');
@@ -1106,7 +1100,15 @@ const UI=(()=>{
   
   function flash(txt,col,dur=2000){const el=gel('hudMsg');if(!el)return;clearTimeout(_mt);el.textContent=txt;el.style.color='#'+(col||0xffffff).toString(16).padStart(6,'0');el.classList.add('show');_mt=setTimeout(()=>el.classList.remove('show'),dur);}
   function lapBanner(lap,tot){const el=gel('lapBan');if(!el)return;clearTimeout(_lt);el.textContent=lap>tot?'FINAL LAP!':'LAP '+lap;el.classList.remove('hidden');el.classList.add('show');_lt=setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.classList.add('hidden'),400);},2500);}
-  function showEnd(pos,time){gel('sEnd').classList.remove('hidden');setTimeout(()=>gel('sEnd').style.opacity=1,10);const M=['CHAMPION!','GREAT RACE!','WELL DONE!','KEEP TRYING!'],O=['1ST','2ND','3RD','4TH','5TH','6TH','7TH','8TH'],i=Math.min(pos-1,7);gel('endTitle').textContent=M[Math.min(i,3)];gel('endPos').textContent=O[i]+' PLACE';gel('endTime').textContent='TIME: '+fmt(time);}
+
+  function showEnd(pos,time){
+    const el=gel('sEnd');
+    el.style.opacity=0;
+    el.classList.remove('hidden');
+    setTimeout(()=>el.style.opacity=1,10);
+    const M=['CHAMPION!','GREAT RACE!','WELL DONE!','KEEP TRYING!'],O=['1ST','2ND','3RD','4TH','5TH','6TH','7TH','8TH'],i=Math.min(pos-1,7);
+    gel('endTitle').textContent=M[Math.min(i,3)];gel('endPos').textContent=O[i]+' PLACE';gel('endTime').textContent='TIME: '+fmt(time);
+  }
   function hitFlash(){const el=gel('hitFlash');if(!el)return;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),150);}
   function fmt(s){const m=Math.floor(s/60),ss=Math.floor(s%60),ms=Math.floor((s%1)*1000);return`${m}:${String(ss).padStart(2,'0')}.${String(ms).padStart(3,'0')}`;}
   return{load,hideLoad,showMenu,hideMenu,showMapSelect,hideMapSelect,showMPLobby,hideMPLobby,showMPLobbyRoom,updateLobbyPlayers,mpError,countdown,tick,setItem,updateMPHud,flash,lapBanner,showEnd,hitFlash,fmt};
@@ -1118,9 +1120,9 @@ const UI=(()=>{
 function buildSky(scene){
   const skyCv=document.createElement('canvas');skyCv.width=2;skyCv.height=256;const skyCtx=skyCv.getContext('2d');const grad=skyCtx.createLinearGradient(0,0,0,256);grad.addColorStop(0,'#1e82dc');grad.addColorStop(.5,'#5cb8ff');grad.addColorStop(1,'#a6d8ff');skyCtx.fillStyle=grad;skyCtx.fillRect(0,0,2,256);
   const skyTex=new THREE.CanvasTexture(skyCv);const skyMat=new THREE.MeshBasicMaterial({map:skyTex,side:THREE.BackSide,depthWrite:false,fog:false});const skySphere=new THREE.Mesh(new THREE.SphereGeometry(1500,32,16),skyMat);skySphere.renderOrder=-1;scene.add(skySphere);
-  const clouds=[];const cloudMat=new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:.9});
-  for(let i=0;i<30;i++){const grp=new THREE.Group();const sc=2+Math.random()*5;for(let p=0;p<5;p++){const puff=new THREE.Mesh(new THREE.SphereGeometry(10*sc,12,12),cloudMat);puff.position.set(rnd(-10,10)*sc,rnd(-3,5)*sc,rnd(-10,10)*sc);grp.add(puff);}grp.position.set(rnd(-800,800),rnd(150,350),rnd(-800,800));scene.add(grp);clouds.push({grp,spd:rnd(.1,.4)});}
-  return clouds;
+  const cloudList=[];const cloudMat=new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:.9});
+  for(let i=0;i<30;i++){const grp=new THREE.Group();const sc=2+Math.random()*5;for(let p=0;p<5;p++){const puff=new THREE.Mesh(new THREE.SphereGeometry(10*sc,12,12),cloudMat);puff.position.set(rnd(-10,10)*sc,rnd(-3,5)*sc,rnd(-10,10)*sc);grp.add(puff);}grp.position.set(rnd(-800,800),rnd(150,350),rnd(-800,800));scene.add(grp);cloudList.push({grp,spd:rnd(.1,.4)});}
+  return cloudList;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1131,11 +1133,9 @@ window._raceDone=false;
 let gState='LOAD',racers=[],player=null,aiList=[];
 let items=null,activeMissiles=[];
 let raceT0=0,raceTime=0,lastTS=0,hudF=0,idleAngle=0;
-// FIX: Sync rate limiter — don't flood server (send ~20 times/sec)
+
+const SYNC_INTERVAL = 1/20;  // 20 FPS network sync
 let _syncAccum = 0;
-const SYNC_INTERVAL = 1/20;
-// ADDED
-let lastSync = 0;
 
 function initRenderer(){
   scene=new THREE.Scene();scene.background=new THREE.Color(0x5cb8ff);scene.fog=new THREE.FogExp2(0xa6d8ff,.0015);
@@ -1166,18 +1166,17 @@ function buildGame(){
   const starts=Track.startPositions(),cps=Track.getCpts();
   racers=[];aiList=[];activeMissiles=[];
 
-  // FIX: In MP, use mpMyIndex (set from server) as our kart color/position slot
   const mySlot = isMultiplayer ? mpMyIndex : 0;
   player=new Racer(mySlot, true, starts[mySlot % starts.length], scene, cps, SETTINGS_LAPS);
 
   if(!isMultiplayer){
     racers.push(player);
     for(let i=0;i<SETTINGS_AI_COUNT;i++){
-      const ai=new Racer(i+1,false,starts[i+1],scene,cps,SETTINGS_LAPS);
+      const slot=i+1;
+      const ai=new Racer(slot,false,starts[slot % starts.length],scene,cps,SETTINGS_LAPS);
       racers.push(ai);aiList.push(new AI(ai,SETTINGS_AI_SKILL));
     }
   } else {
-    // FIX: In MP mode only push the local player; remotes are added dynamically via sync
     racers=[player];
   }
 
@@ -1186,7 +1185,7 @@ function buildGame(){
   UI.setItem(null);
   Cam.init(camera,player.body.p,player.body.h);
   MMap.init(racers);
-  if(isMultiplayer) UI.updateMPHud(1);
+  if(isMultiplayer) UI.updateMPHud(Object.keys(remoteRacers).length + 1);
 }
 
 function teardown(){
@@ -1194,7 +1193,7 @@ function teardown(){
   for(let id in remoteRacers){remoteRacers[id].destroy(scene);}
   remoteRacers={};
   if(items){items.destroy();items=null;}
-  while(scene.children.length)scene.remove(scene.children[0]);
+  if(renderer){renderer.dispose();}
   initRenderer();
 }
 
@@ -1250,10 +1249,8 @@ function boot(){
       setTimeout(()=>{gel('btnJoinRoom').disabled=false;gel('btnJoinRoom').textContent='JOIN';},3000);
     };
 
-    // FIX: Enter key in join code field
     gel('joinCode').addEventListener('keydown', e => { if(e.key === 'Enter') gel('btnJoinRoom').click(); });
 
-    // FIX: Leave room properly disconnects socket
     gel('btnLeaveRoom').onclick=()=>{
       MP.leaveRoom();
       gel('mpLobbyRoom').classList.add('hidden');
@@ -1261,7 +1258,6 @@ function boot(){
       const badge=gel('mpStatusBadge');if(badge){badge.textContent='● NOT CONNECTED';badge.className='';}
     };
 
-    // Host selects track → server broadcasts race_start to everyone
     gel('btnHostSelectTrack').onclick=()=>{
       gel('sMultiplayer').classList.add('hidden');
       UI.showMapSelect();
@@ -1271,15 +1267,13 @@ function boot(){
     document.querySelectorAll('.map-btn').forEach(btn=>{
       btn.onclick=(e)=>{
         SETTINGS_MAP=parseInt(e.currentTarget.getAttribute('data-map'));
+        
+        // Host has successfully created/joined a room so isMultiplayer is TRUE now
         if(isMultiplayer && mpIsHost){
-          // Tell server → server sends race_start to all players
           UI.hideMapSelect();
           MP.hostSelectsMapAndStarts(SETTINGS_MAP);
-          // Show "waiting for race to begin" overlay briefly
           UI.flash('🏎 Starting race for all players...', 0x43b047, 3000);
-          gel('sMultiplayer').classList.remove('hidden');
-          gel('mpLobbySetup').classList.add('hidden');
-          gel('mpLobbyRoom').classList.remove('hidden');
+          // Wait for the server to reply with "race_start"
         } else if(!isMultiplayer){
           UI.hideMapSelect();
           AudioSys.init();
@@ -1292,9 +1286,8 @@ function boot(){
     gel('btnRestart').onclick=()=>{
       if(isMultiplayer){MP.leaveRoom();}
       isMultiplayer=false;
-      gel('sEnd').style.opacity=0;setTimeout(()=>gel('sEnd').classList.add('hidden'),400);
+      const endEl=gel('sEnd');endEl.style.opacity=0;endEl.classList.add('hidden');
       gel('hud').classList.add('hidden');
-      // Reset MP UI state
       gel('mpLobbySetup').classList.remove('hidden');
       gel('mpLobbyRoom').classList.add('hidden');
       const badge=gel('mpStatusBadge');if(badge){badge.textContent='● NOT CONNECTED';badge.className='';}
@@ -1323,7 +1316,9 @@ function loop(ts){
   if(gState==='RACE'){
     raceTime=performance.now()*.001-raceT0;
     const inp=readInput();
-    if(inp.useItem&&player.item){player.fireItem(racers);inp.useItem=false;}
+
+    const remoteArr = Object.values(remoteRacers);
+    if(inp.useItem&&player.item){player.fireItem(racers, remoteArr);inp.useItem=false;}
     player.update(inp,dt);
 
     if(!isMultiplayer){
@@ -1331,24 +1326,20 @@ function loop(ts){
       for(let i=1;i<racers.length;i++)racers[i].update(null,dt);
     }
 
-    // FIX: Update & draw remote racers in MP
     if(isMultiplayer){
       for(const id in remoteRacers) remoteRacers[id].update(dt);
-      // Throttled sync
       _syncAccum+=dt;
       if(_syncAccum>=SYNC_INTERVAL){_syncAccum=0;MP.sendSync();}
     }
 
-    let collidableBodies=racers.map(r=>r.body);
-    if(isMultiplayer)for(const id in remoteRacers)collidableBodies.push(remoteRacers[id].body);
-    resolveCollisions(collidableBodies);
-    for(const r of racers)resolveWall(r.body);
+    const localBodies = racers.map(r=>r.body);
+    resolveCollisions(localBodies);
+    for(const r of racers) resolveWall(r.body);
 
     items.update(racers,dt);
     Parts.update(dt);
     for(let i=activeMissiles.length-1;i>=0;i--){const m=activeMissiles[i];m.update(dt);if(m.dead){if(m._onHit)m._onHit(m.p);activeMissiles.splice(i,1);}}
 
-    // Position sorting (only local racers for local HUD)
     const sorted=[...racers].sort((a,b)=>(b.progress?b.progress():0)-(a.progress?a.progress():0));
     for(let i=0;i<sorted.length;i++)sorted[i].racePos=i+1;
 
@@ -1356,8 +1347,7 @@ function loop(ts){
 
     if(++hudF%2===0){
       UI.tick({spd:player.body.kmh,lap:player.lap,tot:SETTINGS_LAPS,pos:player.racePos,time:raceTime,shield:player.body.shield});
-      // FIX: Pass remote racers to minimap draw
-      MMap.draw(Object.values(remoteRacers));
+      MMap.draw(remoteArr);
     }
     if(window._raceDone){window._raceDone=false;gState='END';setTimeout(()=>UI.showEnd(player.racePos,raceTime),1500);}
   } else {
