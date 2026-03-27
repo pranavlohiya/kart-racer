@@ -4,9 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
 <title>Kart Racer 3D</title>
-<!-- MULTIPLAYER START: Socket.io CDN -->
 <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
-<!-- MULTIPLAYER END -->
 <style>
   :root { --p: #e52521; --s: #fbd000; --b: #43b047; --t: #f0f0f0; --sky: #5cb8ff; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -14,25 +12,21 @@
   #c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; z-index: 1; }
   .hidden { display: none !important; opacity: 0; pointer-events: none; }
   
-  /* UI Screens */
   .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.4s ease; }
   #sLoad { background: var(--sky); }
   #sMenu, #sMap, #sMultiplayer { background: radial-gradient(circle at center, rgba(92,184,255,0.85) 0%, rgba(30,130,220,0.95) 100%); backdrop-filter: blur(8px); }
   #sEnd { background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); }
   .box { text-align: center; max-width: 680px; padding: 2.5rem; width: 100%; position: relative; }
-  #sMap .box { max-width: 900px; } /* Wider box for the maps grid */
+  #sMap .box { max-width: 900px; }
   
-  /* Typography & Title */
   .gtitle { font-family: 'Arial Black', Impact, sans-serif; font-size: 4.5rem; letter-spacing: 2px; margin-bottom: 1.5rem; line-height: 1; text-transform: uppercase; transform: skew(-5deg); text-shadow: 0 8px 0 rgba(0,0,0,0.2); }
   .gtitle span { display: inline-block; color: white; -webkit-text-stroke: 3px var(--p); text-shadow: 4px 4px 0 var(--p); }
   .gtitle em { display: inline-block; color: var(--s); font-style: normal; -webkit-text-stroke: 3px #c97a00; text-shadow: 4px 4px 0 #c97a00; margin-left: -10px; }
   
-  /* Loading */
   .lbw { width: 100%; height: 12px; background: rgba(0,0,0,0.2); border-radius: 6px; overflow: hidden; margin-bottom: 1rem; border: 2px solid white; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
   .lbf { height: 100%; width: 0%; background: linear-gradient(90deg, var(--p), var(--s), var(--b)); transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
   #loadTxt { font-size: 0.9rem; color: white; letter-spacing: 3px; text-transform: uppercase; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
   
-  /* Menu Controls & Options */
   .cbox { margin: 1.5rem 0; background: rgba(255,255,255,0.15); border: 3px solid rgba(255,255,255,0.5); border-radius: 16px; padding: 1.5rem; box-shadow: 0 8px 32px rgba(0,0,0,0.2); }
   .cbox h3 { font-family: 'Arial Black', sans-serif; font-size: 1.2rem; letter-spacing: 2px; color: white; margin-bottom: 1.2rem; text-shadow: 2px 2px 0 var(--p); }
   .cgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; text-align: left; }
@@ -43,10 +37,8 @@
   .opts label { color: white; font-family: 'Arial Black', sans-serif; font-size: 1rem; text-shadow: 2px 2px 0 var(--p); display: flex; flex-direction: column; gap: 0.5rem; text-align: center; }
   .opts select { padding: 0.6rem; font-family: 'Arial Black', sans-serif; font-size: 1.1rem; border-radius: 8px; border: 3px solid white; background: var(--s); color: #c97a00; cursor: pointer; outline: none; box-shadow: 0 4px 0 #c97a00; text-align: center; }
   
-  /* Multiplayer Inputs */
-  .mp-input { width: 100%; padding: 0.8rem; border-radius: 8px; border: 3px solid white; font-family: 'Arial Black', sans-serif; font-size: 1.2rem; text-align: center; text-transform: uppercase; background: rgba(255,255,255,0.9); outline: none; }
+  .mp-input { width: 100%; padding: 0.8rem; border-radius: 8px; border: 3px solid white; font-family: 'Arial Black', sans-serif; font-size: 1.2rem; text-align: center; text-transform: uppercase; background: rgba(255,255,255,0.9); color: #333; outline: none; }
 
-  /* Map Selection */
   .map-grid { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 1.5rem; }
   .map-btn { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 150px; padding: 1rem; background: rgba(0,0,0,0.6); border: 2px solid var(--s); border-radius: 8px; color: white; font-family: 'Arial Black', sans-serif; font-size: 0.85rem; cursor: pointer; transition: transform 0.1s, background 0.1s; text-transform: uppercase; box-shadow: 0 4px 0 #c97a00; }
   .map-btn:hover { background: var(--s); color: #000; transform: scale(1.05); }
@@ -54,12 +46,15 @@
   .map-icon { width: 100px; height: 100px; background: #3a8040; border: 2px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 8px; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
   .map-btn:hover .map-icon { border-color: #000; }
 
-  /* Buttons */
   .btn { position: relative; padding: 1.2rem 3.5rem; background: var(--s); color: #fff; border: 4px solid white; border-radius: 12px; font-family: 'Arial Black', Impact, sans-serif; font-size: 1.4rem; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 8px 0 #c97a00, 0 15px 20px rgba(0,0,0,0.3); transition: all 0.1s; transform: skew(-5deg); overflow: hidden; text-shadow: 2px 2px 0 #c97a00; margin-top: 1rem; }
   .btn:hover { background: #ffdf33; transform: skew(-5deg) translateY(2px); box-shadow: 0 6px 0 #c97a00, 0 10px 15px rgba(0,0,0,0.3); }
   .btn:active { transform: skew(-5deg) translateY(8px); box-shadow: 0 0 0 #c97a00, 0 2px 5px rgba(0,0,0,0.3); }
 
-  /* HUD */
+  /* MP Status badge */
+  #mpStatusBadge { display:inline-block; margin-top:0.8rem; padding: 0.4rem 1rem; border-radius: 20px; font-size:0.85rem; font-weight:bold; letter-spacing:1px; background: rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.4); color: #fff; }
+  #mpStatusBadge.connected { border-color: var(--b); background: rgba(67,176,71,0.3); }
+  #mpStatusBadge.error { border-color: var(--p); background: rgba(229,37,33,0.3); }
+
   #hud { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
   #hudTop { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 2.5rem; background: rgba(0,0,0,0.6); border: 3px solid rgba(255,255,255,0.8); border-radius: 50px; padding: 10px 30px; box-shadow: 0 6px 0 rgba(0,0,0,0.3); backdrop-filter: blur(4px); }
   .hl { font-size: 0.7rem; letter-spacing: 2px; color: var(--s); text-transform: uppercase; margin-right: 6px; font-weight: bold; }
@@ -68,25 +63,23 @@
   #hudLN { font-family: 'Arial Black', Impact, sans-serif; font-size: 2rem; color: white; text-shadow: 2px 2px 0 var(--b); }
   #hudTM { font-size: 1.4rem; letter-spacing: 2px; min-width: 110px; font-weight: bold; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.5); }
   
-  /* Speedometer */
+  /* MP player count badge in HUD */
+  #hudMP { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.6); border: 2px solid var(--b); border-radius: 10px; padding: 6px 14px; font-size: 0.85rem; font-weight: bold; color: #fff; display: none; }
+  
   #hudSpd { position: absolute; bottom: 30px; left: 30px; }
   #spdW { position: relative; display: inline-block; width: 140px; }
   #spdSvg { width: 140px; height: 80px; display: block; overflow: visible; }
   #spdVal { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); font-family: 'Arial Black', Impact, sans-serif; font-size: 2.5rem; line-height: 1; text-shadow: 3px 3px 0 rgba(0,0,0,0.8); color: white; font-style: italic; }
   #spdUnit { font-size: 0.7rem; letter-spacing: 3px; color: var(--s); margin-top: 4px; text-align: center; font-weight: bold; text-shadow: 1px 1px 0 #000; }
   
-  /* Item Box */
   #hudItm { position: absolute; top: 20px; right: 30px; }
   #itmBox { width: 90px; height: 90px; background: rgba(0,0,0,0.5); border: 4px solid white; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 6px 0 rgba(0,0,0,0.3); transition: all 0.2s; position: relative; overflow: hidden; }
   #itmIcon { font-size: 3.5rem; line-height: 1; filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.8)); z-index: 2; transform: scale(1); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   #itmLbl { font-size: 0.5rem; letter-spacing: 1px; color: rgba(255,255,255,0.6); text-transform: uppercase; font-weight: bold; margin-top: 4px; }
-  
-  /* Item specific styling */
   #itmBox.iboost { border-color: var(--p); background: rgba(229,37,33,0.3); }
   #itmBox.imissile { border-color: var(--b); background: rgba(67,176,71,0.3); }
   #itmBox.ishield { border-color: #3caaff; background: rgba(60,170,255,0.3); }
   
-  /* Messages & Banners */
   #hudMsg { position: absolute; top: 30%; left: 50%; transform: translateX(-50%) scale(0.5); font-family: 'Arial Black', Impact, sans-serif; font-size: 3rem; letter-spacing: 2px; opacity: 0; transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); white-space: nowrap; text-shadow: 4px 4px 0 #000, 0 0 20px currentColor; pointer-events: none; -webkit-text-stroke: 1px black; }
   #hudMsg.show { opacity: 1; transform: translateX(-50%) scale(1); }
   
@@ -104,7 +97,6 @@
 
   #minimap { position: absolute; bottom: 30px; right: 30px; width: 150px; height: 150px; background: rgba(0,0,0,0.4); border: 4px solid white; border-radius: 50%; box-shadow: 0 6px 0 rgba(0,0,0,0.3); backdrop-filter: blur(4px); }
   
-  /* End Screen */
   #endTitle { font-family: 'Arial Black', Impact, sans-serif; font-size: 4rem; letter-spacing: 4px; color: white; text-shadow: 4px 4px 0 var(--p); margin-bottom: 1rem; transform: skew(-5deg); }
   #endPos { font-family: 'Arial Black', Impact, sans-serif; font-size: 6rem; color: var(--s); text-shadow: 6px 6px 0 #c97a00, 0 0 40px var(--s); margin-bottom: 0.5rem; line-height: 1; -webkit-text-stroke: 2px white; }
   #endTime { font-size: 1.5rem; color: white; letter-spacing: 3px; margin-bottom: 2rem; font-weight: bold; background: rgba(255,255,255,0.2); padding: 10px 30px; border-radius: 30px; display: inline-block; border: 2px solid white; }
@@ -166,7 +158,6 @@
               </select>
             </label>
           </div>
-
         </div>
         <button class="btn" id="btnStart">CONTINUE TO TRACKS</button>
         <button class="btn" id="btnBackToMode" style="background:#888; font-size:1rem; padding: 0.8rem 2rem; margin-left:10px; box-shadow: 0 4px 0 #555;">BACK</button>
@@ -181,32 +172,47 @@
     
     <div id="mpLobbySetup">
         <div class="cbox">
+            <div id="mpStatusBadge">● NOT CONNECTED</div>
             <button class="btn" id="btnCreateRoom" style="width:100%; margin-bottom:1.5rem; background:var(--p); box-shadow: 0 8px 0 #901111;">CREATE ROOM</button>
             <div style="display:flex; gap:10px; align-items: stretch; margin-top: 1rem;">
-                <input type="text" id="joinCode" class="mp-input" placeholder="ENTER ROOM CODE"/>
+                <input type="text" id="joinCode" class="mp-input" placeholder="ENTER ROOM CODE" maxlength="6"/>
                 <button class="btn" id="btnJoinRoom" style="margin:0; padding: 0 2rem; height: auto;">JOIN</button>
+            </div>
+            <!-- BUG FIX: Laps selector available in MP lobby too -->
+            <div class="opts" style="margin-top:1.2rem; padding-top:1rem;">
+              <label>LAPS
+                <select id="uiLapsMP">
+                  <option value="1">1 Lap</option>
+                  <option value="3" selected>3 Laps</option>
+                  <option value="5">5 Laps</option>
+                </select>
+              </label>
             </div>
         </div>
         <button class="btn" id="btnBackFromMP" style="background:#888; font-size:1rem; padding: 0.8rem 2rem; box-shadow: 0 4px 0 #555;">BACK</button>
     </div>
 
-    <div id="mpLobbyRoom" class="hidden cbox">
-        <h3 style="font-size: 1.5rem;">ROOM CODE: <span id="lobbyCodeDisplay" style="color:var(--s); -webkit-text-stroke: 1px #000;">----</span></h3>
-        <p id="lobbyStatus" style="font-weight:bold; margin-top:1rem; font-size:1.1rem; color:#fff;">Waiting for host to start...</p>
-        <div style="margin-top: 1.5rem;">
-            <button class="btn hidden" id="btnHostSelectTrack" style="width:100%;">SELECT TRACK & START</button>
+    <div id="mpLobbyRoom" class="hidden">
+        <div class="cbox">
+            <h3 style="font-size: 1.5rem;">ROOM CODE: <span id="lobbyCodeDisplay" style="color:var(--s); -webkit-text-stroke: 1px #000; font-size:2rem; letter-spacing:4px;">----</span></h3>
+            <p style="color:rgba(255,255,255,0.7); font-size:0.8rem; margin-top:0.3rem;">Share this code with your friends!</p>
+            <p id="lobbyStatus" style="font-weight:bold; margin-top:1rem; font-size:1.1rem; color:#fff; min-height:1.5em;">Waiting for players...</p>
+            <div id="playerListUI" style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:8px; justify-content:center;"></div>
         </div>
+        <div style="margin-top:1rem;">
+            <button class="btn hidden" id="btnHostSelectTrack" style="width:100%;">SELECT TRACK & START</button>
+            <p id="waitingForHostMsg" style="color:rgba(255,255,255,0.7); margin-top:0.8rem; font-size:0.9rem; display:none;">Waiting for host to select a track...</p>
+        </div>
+        <button class="btn" id="btnLeaveRoom" style="background:#888; font-size:1rem; padding: 0.8rem 2rem; box-shadow: 0 4px 0 #555; margin-top:0.5rem;">LEAVE ROOM</button>
     </div>
   </div>
 </div>
 
-<!-- TRACK SELECTION MENU WITH PREVIEWS -->
+<!-- TRACK SELECTION -->
 <div id="sMap" class="screen hidden">
   <div class="box">
     <h1 class="gtitle" style="font-size:3rem; margin-bottom: 0.5rem;"><span>SELECT</span><br/><em>TRACK</em></h1>
-    <div class="map-grid" id="mapGrid">
-      <!-- Buttons dynamically generated by JS -->
-    </div>
+    <div class="map-grid" id="mapGrid"></div>
   </div>
 </div>
 
@@ -231,6 +237,9 @@
     <div style="width:3px;height:35px;background:rgba(255,255,255,0.4);border-radius:2px"></div>
     <div><span class="hl">TIME</span><span id="hudTM">0:00.000</span></div>
   </div>
+  
+  <!-- MP player count indicator -->
+  <div id="hudMP">🌐 <span id="hudMPCount">1</span> PLAYERS</div>
   
   <div id="hudSpd">
     <div id="spdW">
@@ -260,29 +269,21 @@
 <script>
 'use strict';
 
-// Global Settings
+// ── Global Settings ──────────────────────────────────────────
 let SETTINGS_AI_COUNT = 3;
 let SETTINGS_AI_SKILL = 0.75;
 let SETTINGS_LAPS = 3;
 let SETTINGS_MAP = 0;
 
-// The 5 Track Maps
 const MAPS = [
-  // 1. Classic Grand Prix
-  [ {x:0,z:0},{x:70,z:-28},{x:150,z:-60},{x:200,z:-35},{x:220,z:20}, {x:200,z:80},{x:150,z:108},{x:90,z:98},{x:60,z:122},{x:18,z:112}, {x:-28,z:102},{x:-80,z:114},{x:-108,z:84},{x:-108,z:36},{x:-140,z:0}, {x:-108,z:-36},{x:-72,z:-64},{x:-35,z:-52},{x:-6,z:-34} ],
-  // 2. High Speed Oval
-  [ {x:0,z:0}, {x:120,z:-50}, {x:240,z:0}, {x:240,z:120}, {x:120,z:170}, {x:0,z:120} ],
-  // 3. Serpent's Canyon
-  [ {x:0,z:0}, {x:80,z:-50}, {x:180,z:0}, {x:280,z:-50}, {x:380,z:0}, {x:320,z:80}, {x:200,z:150}, {x:100,z:100} ],
-  // 4. The Triangle
-  [ {x:0,z:0}, {x:200,z:-120}, {x:350,z:80}, {x:150,z:250} ],
-  // 5. Star Circuit
-  [ {x:0,z:0}, {x:150,z:-30}, {x:100,z:100}, {x:250,z:150}, {x:80,z:200}, {x:50,z:320}, {x:-20,z:180}, {x:-180,z:150}, {x:-50,z:100} ]
+  [ {x:0,z:0},{x:70,z:-28},{x:150,z:-60},{x:200,z:-35},{x:220,z:20},{x:200,z:80},{x:150,z:108},{x:90,z:98},{x:60,z:122},{x:18,z:112},{x:-28,z:102},{x:-80,z:114},{x:-108,z:84},{x:-108,z:36},{x:-140,z:0},{x:-108,z:-36},{x:-72,z:-64},{x:-35,z:-52},{x:-6,z:-34} ],
+  [ {x:0,z:0},{x:120,z:-50},{x:240,z:0},{x:240,z:120},{x:120,z:170},{x:0,z:120} ],
+  [ {x:0,z:0},{x:80,z:-50},{x:180,z:0},{x:280,z:-50},{x:380,z:0},{x:320,z:80},{x:200,z:150},{x:100,z:100} ],
+  [ {x:0,z:0},{x:200,z:-120},{x:350,z:80},{x:150,z:250} ],
+  [ {x:0,z:0},{x:150,z:-30},{x:100,z:100},{x:250,z:150},{x:80,z:200},{x:50,z:320},{x:-20,z:180},{x:-180,z:150},{x:-50,z:100} ]
 ];
+const MAP_NAMES = ["1. Classic GP","2. High Speed Oval","3. Serpent's Canyon","4. The Triangle","5. Star Circuit"];
 
-const MAP_NAMES = ["1. Classic GP", "2. High Speed Oval", "3. Serpent's Canyon", "4. The Triangle", "5. Star Circuit"];
-
-// ─── Helpers ──────────────────────────────────────────────────
 function v3(x,y,z){return new THREE.Vector3(x||0,y||0,z||0)}
 function lerp(a,b,t){return a+(b-a)*t}
 function clamp(v,a,b){return v<a?a:v>b?b:v}
@@ -292,193 +293,299 @@ function gel(id){return document.getElementById(id)}
 function rnd(a,b){return a+(b-a)*Math.random()}
 
 // ══════════════════════════════════════════════════════════════
-//  MULTIPLAYER START
+//  MULTIPLAYER MANAGER  (all bugs fixed)
 // ══════════════════════════════════════════════════════════════
 let isMultiplayer = false;
 let mpSocket = null;
 let mpRoomCode = '';
 let mpIsHost = false;
-let mpMyIndex = 0;
-let remoteRacers = {}; // socket.id -> RemoteRacer instance
+let mpMyIndex = 0;           // FIX: guaranteed set before buildGame()
+let mpPlayerCount = 1;
+let remoteRacers = {};
 
 class RemoteRacer {
     constructor(id, idx, scene, startPos) {
         this.id = id;
         this.idx = idx;
-        // Simplified body using physical interpolation
-        this.body = new Body(startPos.pos, startPos.angle, true); // true = isRemote
+        this.isPlayer = false;
+        this.done = false;
+        this.racePos = idx + 1;
+        this.body = new Body(startPos.pos, startPos.angle, true);
         this.vis = new KartVis(idx, scene);
         this.target = { p: startPos.pos.clone(), h: startPos.angle };
-        this.done = false;
     }
     update(dt) {
-        // Interpolate position and heading to match server target smoothly
-        this.body.p.lerp(this.target.p, 1 - Math.exp(-dt * 10));
-        let hDiff = adiff(this.target.h, this.body.h);
-        this.body.h += hDiff * Math.min(1, dt * 10);
-        
+        // Smooth interpolation toward server position
+        this.body.p.lerp(this.target.p, clamp(dt * 15, 0, 1));
+        let hd = adiff(this.target.h, this.body.h);
+        this.body.h += hd * clamp(dt * 15, 0, 1);
+        this.body.steerVal = lerp(this.body.steerVal, this.target.steer || 0, 0.2);
         this.vis.update(this.body, dt);
     }
-    destroy(scene) {
-        this.vis.remove(scene);
-    }
+    progress() { return 0; }   // remotes don't affect local race position
+    destroy(scene) { this.vis.remove(scene); }
 }
 
 const MP = {
+    _initialized: false,
+
     init() {
-        if(mpSocket) return;
-        
-        // Ensure you change this URL to your deployed Socket.io Server!
-        // Local testing example: "http://localhost:3000"
-        mpSocket = io("YOUR_SERVER_URL", { autoConnect: false });
-        
-        mpSocket.on('room_created', (code) => {
-            mpRoomCode = code;
-            mpIsHost = true;
-            UI.showMPLobby(code, true);
+        if (this._initialized) return;
+        this._initialized = true;
+
+        // FIX: Use polling fallback in case websocket is blocked
+        mpSocket = io("https://kart-racer-server.onrender.com", {
+            transports: ["websocket", "polling"],
+            reconnectionAttempts: 5,
+            timeout: 10000
         });
-        
+
+        mpSocket.on('connect', () => {
+            console.log("✅ Connected:", mpSocket.id);
+            const badge = gel('mpStatusBadge');
+            if (badge) { badge.textContent = '● CONNECTED'; badge.className = 'connected'; }
+        });
+
+        mpSocket.on('connect_error', (err) => {
+            console.warn("❌ Connection error:", err.message);
+            const badge = gel('mpStatusBadge');
+            if (badge) { badge.textContent = '● SERVER OFFLINE'; badge.className = 'error'; }
+            UI.mpError("Cannot reach server. Check your connection.");
+        });
+
+        mpSocket.on('disconnect', (reason) => {
+            console.warn("Disconnected:", reason);
+            const badge = gel('mpStatusBadge');
+            if (badge) { badge.textContent = '● DISCONNECTED'; badge.className = 'error'; }
+            // FIX: If disconnected mid-race, show a message instead of silently breaking
+            if (gState === 'RACE') {
+                UI.flash('⚠ CONNECTION LOST', 0xff4444, 5000);
+            }
+        });
+
+        // ── Room events ───────────────────────────────────────
+        mpSocket.on('room_created', (data) => {
+            mpRoomCode = data.code;
+            mpIsHost = true;
+            mpPlayerCount = data.players ? data.players.length : 1;
+            UI.showMPLobbyRoom(data.code, true, mpPlayerCount, data.players || [mpSocket.id]);
+        });
+
+        // FIX: 'room_error' was never handled → user got no feedback
+        mpSocket.on('room_error', (data) => {
+            UI.mpError(data.message || "Room error. Try again.");
+        });
+
         mpSocket.on('joined_room', (data) => {
             mpRoomCode = data.code;
             mpIsHost = false;
-            UI.showMPLobby(data.code, false);
+            mpPlayerCount = data.players ? data.players.length : 2;
+            UI.showMPLobbyRoom(data.code, false, mpPlayerCount, data.players || []);
         });
-        
-        mpSocket.on('player_joined', () => {
-            // Update lobby UI if needed
+
+        // FIX: 'join_error' was never handled → silent failure on bad code
+        mpSocket.on('join_error', (data) => {
+            UI.mpError(data.message || "Room not found. Check the code.");
         });
-        
+
+        mpSocket.on('player_joined', (data) => {
+            // FIX: old code passed (players) array directly, now handle both forms
+            const players = Array.isArray(data) ? data : (data.players || []);
+            mpPlayerCount = players.length;
+            UI.updateLobbyPlayers(mpPlayerCount, players);
+        });
+
+        mpSocket.on('player_left', (data) => {
+            const players = Array.isArray(data) ? data : (data.players || []);
+            mpPlayerCount = players.length;
+            UI.updateLobbyPlayers(mpPlayerCount, players);
+
+            // Remove their kart from scene
+            const leftId = data.id || null;
+            if (leftId && remoteRacers[leftId]) {
+                remoteRacers[leftId].destroy(scene);
+                delete remoteRacers[leftId];
+            }
+            if (gState === 'RACE') UI.flash('⚠ A player left', 0xffaa00, 2000);
+            UI.updateMPHud(Object.keys(remoteRacers).length + 1);
+        });
+
+        // ── Race start ────────────────────────────────────────
         mpSocket.on('race_start', (data) => {
-            // Data provided by host via server
-            SETTINGS_MAP = data.map || 0;
-            SETTINGS_LAPS = data.laps || 3;
-            mpMyIndex = data.spawns[mpSocket.id] || 0;
+            console.log("🏁 RACE START received", data);
+
+            // FIXED: fallback to index 0 instead of aborting
+            if (!data.spawns || data.spawns[mpSocket.id] === undefined) {
+                console.warn("Spawn missing, fallback to 0");
+                mpMyIndex = 0;
+            } else {
+                mpMyIndex = data.spawns[mpSocket.id];
+            }
+
+            mpPlayerCount = data.playerCount || Object.keys(data.spawns).length;
+
+            // ADDED: disable bots in multiplayer
+            SETTINGS_AI_COUNT = 0;
+
             isMultiplayer = true;
-            
-            UI.hideMapSelect();
-            UI.hideMenu();
+            SETTINGS_MAP = (data.map !== undefined) ? data.map : 0;
+            SETTINGS_LAPS = data.laps || 3;
+
+            console.log(`My index: ${mpMyIndex}, Map: ${SETTINGS_MAP}, Laps: ${SETTINGS_LAPS}`);
+
+            // Hide all UI screens
             gel('sMultiplayer').classList.add('hidden');
-            
-            AudioSys.init(); 
+            gel('sMap').classList.add('hidden');
+            gel('sMenu').classList.add('hidden');
+
+            AudioSys.init();
             teardown();
-            buildGame(); 
+
+            // ADDED: clear old remote racers before rebuilding
+            remoteRacers = {};
+
+            buildGame();
             startRace();
         });
-        
+
+        // ── Position sync ─────────────────────────────────────
         mpSocket.on('sync', (data) => {
-            // data format: { socketId: {p: Vector3, h: number, spd: number, steer: number}, ... }
+            if (!isMultiplayer || !player) return;
+
+            // REMOVED: broken cleanup that caused random player disappearances.
+            // Players are ONLY removed in 'player_left' event.
+
+            const starts = Track.startPositions();
+
             for (let id in data) {
-                if (id !== mpSocket.id) {
-                    if (!remoteRacers[id]) {
-                        // Late join fallback spawn
-                        const starts = Track.startPositions();
-                        const sIdx = (Object.keys(remoteRacers).length + 1) % starts.length;
-                        remoteRacers[id] = new RemoteRacer(id, sIdx, scene, starts[sIdx]);
-                    }
-                    remoteRacers[id].target.p.copy(data[id].p);
-                    remoteRacers[id].target.h = data[id].h;
-                    remoteRacers[id].body.spd = data[id].spd;
-                    remoteRacers[id].body.steerVal = data[id].steer;
+                if (id === mpSocket.id) continue;
+
+                const pd = data[id];
+                if (!pd) continue;
+
+                if (!remoteRacers[id]) {
+                    const sIdx = (pd.spawnIdx !== undefined) ? pd.spawnIdx : 0;
+                    const safeStart = starts[sIdx % starts.length];
+                    remoteRacers[id] = new RemoteRacer(id, sIdx, scene, safeStart);
+                    UI.updateMPHud(Object.keys(remoteRacers).length + 1);
                 }
-            }
-        });
-        
-        mpSocket.on('player_left', (id) => {
-            if(remoteRacers[id]) {
-                remoteRacers[id].destroy(scene);
-                delete remoteRacers[id];
+
+                const rr = remoteRacers[id];
+                if (pd.p) rr.target.p.set(pd.p.x ?? 0, pd.p.y ?? 0, pd.p.z ?? 0);
+                if (pd.h !== undefined) rr.target.h = pd.h;
+                if (pd.spd !== undefined) rr.body.spd = pd.spd;
+                if (pd.steer !== undefined) rr.target.steer = pd.steer;
             }
         });
     },
+
+    // FIX: Ensure socket connects before emitting, avoid double-connect race
+    _withConnect(cb) {
+        this.init();
+        if (mpSocket.connected) { cb(); return; }
+        mpSocket.once('connect', cb);
+        if (!mpSocket.connecting) mpSocket.connect();
+    },
+
     createRoom() {
-        this.init();
-        mpSocket.connect();
-        mpSocket.emit('create_room');
+        this._withConnect(() => {
+            const laps = parseInt(gel('uiLapsMP').value) || 3;
+            mpSocket.emit('create_room', { laps });
+        });
     },
+
     joinRoom(code) {
-        this.init();
-        mpSocket.connect();
-        mpSocket.emit('join_room', code);
+        if (!code || code.length < 2) { UI.mpError("Enter a valid room code."); return; }
+        this._withConnect(() => {
+            mpSocket.emit('join_room', code.toUpperCase().trim());
+        });
     },
+
+    // FIX: Host track selection now also passes correct laps from MP lap selector
     hostSelectsMapAndStarts(mapId) {
-        if(!mpIsHost) return;
-        // Host emits start intent. Server should assign spawn positions and broadcast 'race_start'
-        mpSocket.emit('start_race', { map: mapId, laps: parseInt(gel('uiLaps').value) || 3 });
+        if (!mpIsHost || !mpSocket || !mpSocket.connected) return;
+        const laps = parseInt(gel('uiLapsMP').value) || 3;
+        mpSocket.emit('start_race', { map: mapId, laps });
     },
+
+    // FIX: Was never disconnecting on leave → socket stayed alive
+    leaveRoom() {
+        if (mpSocket && mpSocket.connected) {
+            mpSocket.emit('leave_room');
+            mpSocket.disconnect();
+        }
+        mpRoomCode = '';
+        mpIsHost = false;
+        mpMyIndex = 0;
+        isMultiplayer = false;
+        this._initialized = false;
+        mpSocket = null;
+    },
+
+    // FIXED: rate-limited sendSync — 20 FPS network sync max
     sendSync() {
-        if (!mpSocket || !isMultiplayer || !player) return;
+        if (!mpSocket || !mpSocket.connected || !isMultiplayer || !player) return;
+        const now = performance.now();
+        if (now - lastSync < 50) return; // 20 FPS network sync
+        lastSync = now;
         mpSocket.emit('sync', {
-            p: player.body.p,
+            p: { x: player.body.p.x, y: player.body.p.y, z: player.body.p.z },
             h: player.body.h,
             spd: player.body.spd,
-            steer: player.body.steerVal
+            steer: player.body.steerVal,
+            spawnIdx: mpMyIndex
         });
     }
 };
-// ══════════════════════════════════════════════════════════════
-//  MULTIPLAYER END
-// ══════════════════════════════════════════════════════════════
 
 // ══════════════════════════════════════════════════════════════
-//  AUDIO ENGINE
+//  AUDIO
 // ══════════════════════════════════════════════════════════════
 const AudioSys = (()=>{
-    let ctx=null, engineOsc=null, engineGain=null, filter=null;
-    function init() {
-        if(ctx) return;
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        if(!AudioContext) return;
-        ctx = new AudioContext();
-        engineOsc = ctx.createOscillator();
-        engineOsc.type = 'sawtooth';
-        filter = ctx.createBiquadFilter();
-        filter.type = 'lowpass';
-        filter.frequency.value = 400;
-        engineGain = ctx.createGain();
-        engineGain.gain.value = 0;
-        engineOsc.connect(filter);
-        filter.connect(engineGain);
-        engineGain.connect(ctx.destination);
+    let ctx=null,engineOsc=null,engineGain=null,filter=null;
+    function init(){
+        if(ctx)return;
+        const AC=window.AudioContext||window.webkitAudioContext;
+        if(!AC)return;
+        ctx=new AC();
+        engineOsc=ctx.createOscillator(); engineOsc.type='sawtooth';
+        filter=ctx.createBiquadFilter(); filter.type='lowpass'; filter.frequency.value=400;
+        engineGain=ctx.createGain(); engineGain.gain.value=0;
+        engineOsc.connect(filter); filter.connect(engineGain); engineGain.connect(ctx.destination);
         engineOsc.start();
     }
-    function updateEngine(speedRatio, isPlayer) {
-        if(!ctx || !isPlayer) return;
-        if(ctx.state === 'suspended') ctx.resume();
-        const pitch = 40 + (speedRatio * 180); 
-        engineOsc.frequency.setTargetAtTime(pitch, ctx.currentTime, 0.1);
-        const vol = clamp(0.1 + (speedRatio * 0.3), 0, 0.4);
-        engineGain.gain.setTargetAtTime(vol, ctx.currentTime, 0.1);
-        filter.frequency.setTargetAtTime(300 + (speedRatio * 1000), ctx.currentTime, 0.1);
+    function updateEngine(speedRatio,isPlayer){
+        if(!ctx||!isPlayer)return;
+        if(ctx.state==='suspended')ctx.resume();
+        engineOsc.frequency.setTargetAtTime(40+speedRatio*180,ctx.currentTime,0.1);
+        engineGain.gain.setTargetAtTime(clamp(0.1+speedRatio*0.3,0,0.4),ctx.currentTime,0.1);
+        filter.frequency.setTargetAtTime(300+speedRatio*1000,ctx.currentTime,0.1);
     }
-    function playItem() {
-        if(!ctx) return;
-        const o = ctx.createOscillator();
-        const g = ctx.createGain();
-        o.type = 'square';
-        o.connect(g); g.connect(ctx.destination);
-        o.frequency.setValueAtTime(400, ctx.currentTime);
-        o.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.1);
-        o.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.2);
-        g.gain.setValueAtTime(0.2, ctx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
-        o.start(); o.stop(ctx.currentTime + 0.3);
+    function playItem(){
+        if(!ctx)return;
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.type='square'; o.connect(g); g.connect(ctx.destination);
+        o.frequency.setValueAtTime(400,ctx.currentTime);
+        o.frequency.exponentialRampToValueAtTime(1200,ctx.currentTime+0.2);
+        g.gain.setValueAtTime(0.2,ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01,ctx.currentTime+0.3);
+        o.start(); o.stop(ctx.currentTime+0.3);
     }
-    function mute() { if(engineGain) engineGain.gain.setTargetAtTime(0, ctx.currentTime, 0.1); }
-    return { init, updateEngine, playItem, mute };
+    function mute(){if(engineGain)engineGain.gain.setTargetAtTime(0,ctx.currentTime,0.1);}
+    return{init,updateEngine,playItem,mute};
 })();
 
 // ══════════════════════════════════════════════════════════════
 //  TRACK
 // ══════════════════════════════════════════════════════════════
 const Track=(()=>{
-  const RW=40, STEPS=20; 
-  let spine=[],norms=[],waypts=[],cpts=[];
-  const GCELL=20; let grid={};
+  const RW=40,STEPS=20;
+  let spine=[],norms=[],waypts=[],cpts=[],grid={};
+  const GCELL=20;
 
   function buildSpine(){
-    spine=[]; norms=[];
-    const CP = MAPS[SETTINGS_MAP];
-    const n=CP.length;
+    spine=[];norms=[];
+    const CP=MAPS[SETTINGS_MAP],n=CP.length;
     for(let i=0;i<n;i++){
       const p0=CP[(i-1+n)%n],p1=CP[i],p2=CP[(i+1)%n],p3=CP[(i+2)%n];
       for(let s=0;s<STEPS;s++){
@@ -499,7 +606,7 @@ const Track=(()=>{
     }
     waypts=[];
     const step=Math.max(1,Math.floor(tot/40));
-    for(let i=0;i<tot;i+=step) waypts.push(spine[i].clone());
+    for(let i=0;i<tot;i+=step)waypts.push(spine[i].clone());
     cpts=[];
     const cs=Math.floor(tot/8);
     for(let c=0;c<8;c++){
@@ -508,394 +615,171 @@ const Track=(()=>{
     }
   }
 
-  function nearestIdx(pos, curIdx = -1) {
-    if (curIdx >= 0 && spine.length > 0) {
-        let best = curIdx, bd = Infinity;
-        const search = 30; // Local search window limits backward/forward checking
-        const len = spine.length;
-        for(let i = -search; i <= search; i++) {
-            let idx = (curIdx + i + len) % len;
-            let dx = spine[idx].x - pos.x, dz = spine[idx].z - pos.z;
-            let d = dx*dx + dz*dz;
-            if (d < bd) { bd = d; best = idx; }
-        }
-        return best;
+  function nearestIdx(pos,curIdx=-1){
+    if(curIdx>=0&&spine.length>0){
+      let best=curIdx,bd=Infinity;
+      const len=spine.length;
+      for(let i=-30;i<=30;i++){let idx=(curIdx+i+len)%len;let dx=spine[idx].x-pos.x,dz=spine[idx].z-pos.z,d=dx*dx+dz*dz;if(d<bd){bd=d;best=idx;}}
+      return best;
     }
-    
-    // Global fallback
     const gx=Math.floor(pos.x/GCELL),gz=Math.floor(pos.z/GCELL);
     let best=-1,bd=Infinity;
-    for(let dx=-2;dx<=2;dx++) for(let dz=-2;dz<=2;dz++){
-      const cell=grid[(gx+dx)+'|'+(gz+dz)]; if(!cell) continue;
-      for(const i of cell){const ddx=spine[i].x-pos.x,ddz=spine[i].z-pos.z,d=ddx*ddx+ddz*ddz;if(d<bd){bd=d;best=i;}}
-    }
+    for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){const cell=grid[(gx+dx)+'|'+(gz+dz)];if(!cell)continue;for(const i of cell){const ddx=spine[i].x-pos.x,ddz=spine[i].z-pos.z,d=ddx*ddx+ddz*ddz;if(d<bd){bd=d;best=i;}}}
     if(best===-1){for(let i=0;i<spine.length;i++){const ddx=spine[i].x-pos.x,ddz=spine[i].z-pos.z,d=ddx*ddx+ddz*ddz;if(d<bd){bd=d;best=i;}}}
     return best;
   }
-  function onRoad(pos, curIdx=-1){const i=nearestIdx(pos, curIdx),s=spine[i],dx=pos.x-s.x,dz=pos.z-s.z;return dx*dx+dz*dz<(RW*.52)*(RW*.52);}
-  function roadFrac(pos, curIdx=-1){const i=nearestIdx(pos, curIdx),s=spine[i],dx=pos.x-s.x,dz=pos.z-s.z,h=RW*.5;return clamp(1-Math.sqrt(dx*dx+dz*dz)/h,0,1);}
+  function onRoad(pos,curIdx=-1){const i=nearestIdx(pos,curIdx),s=spine[i],dx=pos.x-s.x,dz=pos.z-s.z;return dx*dx+dz*dz<(RW*.52)*(RW*.52);}
+  function roadFrac(pos,curIdx=-1){const i=nearestIdx(pos,curIdx),s=spine[i],dx=pos.x-s.x,dz=pos.z-s.z,h=RW*.5;return clamp(1-Math.sqrt(dx*dx+dz*dz)/h,0,1);}
 
   function buildScene(scene){
     const grp=new THREE.Group();
-    
     const gnd=new THREE.Mesh(new THREE.PlaneGeometry(2500,2500).rotateX(-Math.PI/2),new THREE.MeshLambertMaterial({color:0x6cbd45}));
-    gnd.receiveShadow=true; gnd.position.y = -0.1; grp.add(gnd);
-
+    gnd.receiveShadow=true;gnd.position.y=-0.1;grp.add(gnd);
     const tot=spine.length,verts=[],uvs=[],idx=[];
-    for(let i=0;i<tot;i++){
-      const p=spine[i],nm=norms[i],u=i/tot;
-      verts.push(p.x-nm.x*RW*.5,0.01,p.z-nm.z*RW*.5, p.x+nm.x*RW*.5,0.01,p.z+nm.z*RW*.5);
-      uvs.push(0,u*4,1,u*4);
-    }
+    for(let i=0;i<tot;i++){const p=spine[i],nm=norms[i],u=i/tot;verts.push(p.x-nm.x*RW*.5,0.01,p.z-nm.z*RW*.5,p.x+nm.x*RW*.5,0.01,p.z+nm.z*RW*.5);uvs.push(0,u*4,1,u*4);}
     for(let i=0;i<tot;i++){const a=i*2,b=a+1,c=((i+1)%tot)*2,d=c+1;idx.push(a,c,b,b,c,d);}
     const geo=new THREE.BufferGeometry();
     geo.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));
     geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
-    geo.setIndex(idx); geo.computeVertexNormals();
-
-    const trackMesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({color: 0x555566, roughness:0.9}));
-    trackMesh.receiveShadow = true;
-    grp.add(trackMesh);
-
-    // True 3D center dashes instead of warped texture
-    const dashGeo = new THREE.PlaneGeometry(0.8, 3);
-    dashGeo.rotateX(-Math.PI/2);
-    const dashMat = new THREE.MeshBasicMaterial({color: 0xffffff});
-    for(let i=0; i<tot; i+=4){
-        const p = spine[i];
-        const nextP = spine[(i+1)%tot];
-        const dash = new THREE.Mesh(dashGeo, dashMat);
-        dash.position.set(p.x, 0.02, p.z);
-        dash.rotation.y = Math.atan2(nextP.x - p.x, nextP.z - p.z);
-        grp.add(dash);
-    }
-
-    // Chunky Borders (Alternating Red/White and Blue/White blocks)
+    geo.setIndex(idx);geo.computeVertexNormals();
+    const trackMesh=new THREE.Mesh(geo,new THREE.MeshLambertMaterial({color:0x555566}));
+    trackMesh.receiveShadow=true;grp.add(trackMesh);
+    const dashGeo=new THREE.PlaneGeometry(0.8,3);dashGeo.rotateX(-Math.PI/2);
+    const dashMat=new THREE.MeshBasicMaterial({color:0xffffff});
+    for(let i=0;i<tot;i+=4){const p=spine[i],np=spine[(i+1)%tot];const dash=new THREE.Mesh(dashGeo,dashMat);dash.position.set(p.x,0.02,p.z);dash.rotation.y=Math.atan2(np.x-p.x,np.z-p.z);grp.add(dash);}
     for(const side of[-1,1]){
-      const E=RW*.5, SW=1.5, BH=2.5;
-      const bV=[], bIR=[], bIW=[], bIB=[]; 
-      
-      for(let i=0;i<tot;i++){
-        const p=spine[i],nm=norms[i];
-        bV.push(
-            p.x+nm.x*E*side, 0, p.z+nm.z*E*side,
-            p.x+nm.x*E*side, BH, p.z+nm.z*E*side,
-            p.x+nm.x*(E+SW)*side, BH, p.z+nm.z*(E+SW)*side,
-            p.x+nm.x*(E+SW)*side, 0, p.z+nm.z*(E+SW)*side
-        );
-      }
-      for(let i=0;i<tot;i++){
-        const ba=i*4, bb=ba+1, bc=ba+2, bd=ba+3;
-        const nxa=((i+1)%tot)*4, nxb=nxa+1, nxc=nxa+2, nxd=nxa+3;
-        
-        let blockIndices = [];
-        if(side===1){
-            blockIndices.push(ba,nxa,bb, bb,nxa,nxb); 
-            blockIndices.push(bb,nxb,bc, bc,nxb,nxc); 
-            blockIndices.push(bc,nxc,bd, bd,nxc,nxd); 
-        } else {
-            blockIndices.push(ba,bb,nxa, nxa,bb,nxb); 
-            blockIndices.push(bb,bc,nxb, nxb,bc,nxc); 
-            blockIndices.push(bc,bd,nxc, nxc,bd,nxd); 
-        }
-
-        const seq = Math.floor(i/4) % 4; 
-        if(seq === 0) bIR.push(...blockIndices); 
-        else if(seq === 1) bIW.push(...blockIndices); 
-        else if(seq === 2) bIB.push(...blockIndices); 
-        else bIW.push(...blockIndices); 
-      }
-
-      const makeMesh = (v,i,col) => {
-        if(!i.length)return;
-        const g=new THREE.BufferGeometry(); g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));
-        g.setIndex(i); g.computeVertexNormals();
-        const m = new THREE.Mesh(g,new THREE.MeshLambertMaterial({color:col}));
-        m.receiveShadow = true; m.castShadow = true; grp.add(m);
-      };
-      
-      makeMesh(bV, bIR, 0xee3333); 
-      makeMesh(bV, bIW, 0xffffff); 
-      makeMesh(bV, bIB, 0x3366ee); 
+      const E=RW*.5,SW=1.5,BH=2.5,bV=[],bIR=[],bIW=[],bIB=[];
+      for(let i=0;i<tot;i++){const p=spine[i],nm=norms[i];bV.push(p.x+nm.x*E*side,0,p.z+nm.z*E*side,p.x+nm.x*E*side,BH,p.z+nm.z*E*side,p.x+nm.x*(E+SW)*side,BH,p.z+nm.z*(E+SW)*side,p.x+nm.x*(E+SW)*side,0,p.z+nm.z*(E+SW)*side);}
+      for(let i=0;i<tot;i++){const ba=i*4,bb=ba+1,bc=ba+2,bd=ba+3,nxa=((i+1)%tot)*4,nxb=nxa+1,nxc=nxa+2,nxd=nxa+3;let bi=[];if(side===1){bi.push(ba,nxa,bb,bb,nxa,nxb,bb,nxb,bc,bc,nxb,nxc,bc,nxc,bd,bd,nxc,nxd);}else{bi.push(ba,bb,nxa,nxa,bb,nxb,bb,bc,nxb,nxb,bc,nxc,bc,bd,nxc,nxc,bd,nxd);}const seq=Math.floor(i/4)%4;if(seq===0)bIR.push(...bi);else if(seq===2)bIB.push(...bi);else bIW.push(...bi);}
+      const mk=(v,i,col)=>{if(!i.length)return;const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v,3));g.setIndex(i);g.computeVertexNormals();const m=new THREE.Mesh(g,new THREE.MeshLambertMaterial({color:col}));m.receiveShadow=m.castShadow=true;grp.add(m);};
+      mk(bV,bIR,0xee3333);mk(bV,bIW,0xffffff);mk(bV,bIB,0x3366ee);
     }
-
-    const p0=spine[0], nm0=norms[0], p1=spine[1];
-    const fA = Math.atan2(p1.x-p0.x, p1.z-p0.z);
-    
-    const clGeo = new THREE.PlaneGeometry(RW, 4);
-    clGeo.rotateX(-Math.PI/2);
-    clGeo.rotateY(fA);
-    const ccv = document.createElement('canvas'); ccv.width=128; ccv.height=32;
-    const cctx = ccv.getContext('2d');
-    cctx.fillStyle='#fff'; cctx.fillRect(0,0,128,32);
-    cctx.fillStyle='#000';
-    for(let x=0;x<128;x+=16)for(let y=0;y<32;y+=16)if((x/16+y/16)%2===0)cctx.fillRect(x,y,16,16);
-    const cTex = new THREE.CanvasTexture(ccv); cTex.wrapS=cTex.wrapT=THREE.RepeatWrapping; cTex.repeat.set(4,1);
-    const clMesh = new THREE.Mesh(clGeo, new THREE.MeshLambertMaterial({map:cTex}));
-    clMesh.position.set(p0.x, 0.05, p0.z); grp.add(clMesh);
-
-    const gt = new THREE.Group();
-    gt.position.set(p0.x, 0, p0.z); gt.rotation.y = fA;
-    const poleMat = new THREE.MeshLambertMaterial({color: 0xcccccc});
-    for(const s of [-1,1]){
-      const pil = new THREE.Mesh(new THREE.CylinderGeometry(1.5, 1.5, 20), poleMat);
-      pil.position.set(s*(RW/2+3), 10, 0); pil.castShadow=true; gt.add(pil);
-    }
-    const signBox = new THREE.Mesh(new THREE.BoxGeometry(RW+10, 6, 2), new THREE.MeshLambertMaterial({color: 0xe52521}));
-    signBox.position.set(0, 20, 0); signBox.castShadow=true; gt.add(signBox);
-    const sTxt = new THREE.Mesh(new THREE.PlaneGeometry(24, 4), new THREE.MeshBasicMaterial({color: 0xfbd000}));
-    sTxt.position.set(0, 20, 1.05); gt.add(sTxt);
-    grp.add(gt);
-
-    // Safe Hill Placement (No Mushrooms)
-    let spawned = 0;
-    let attempts = 0;
-    while(spawned < 45 && attempts < 2500){
-        attempts++;
-        let px = (Math.random() - 0.5) * 1100;
-        let pz = (Math.random() - 0.5) * 1100;
-        
-        let radius = 20 + Math.random() * 40;
-        
-        // Dynamic clearance check
-        let safeDistSq = (radius + 50) ** 2;
-
-        let tooClose = false;
-        for(let j=0; j<spine.length; j++) { 
-            let dx = px - spine[j].x;
-            let dz = pz - spine[j].z;
-            if((dx*dx + dz*dz) < safeDistSq) { 
-                tooClose = true;
-                break;
-            }
-        }
-        if(tooClose) continue; 
-        
-        let hill = new THREE.Mesh(new THREE.SphereGeometry(radius, 16, 12, 0, Math.PI*2, 0, Math.PI/2), new THREE.MeshLambertMaterial({color: 0x5ab533}));
-        hill.position.set(px, -2, pz);
-        hill.scale.y = 0.4 + Math.random()*0.3; 
-        hill.receiveShadow = true;
-        grp.add(hill);
-        
-        spawned++;
-    }
-
+    const p0=spine[0],nm0=norms[0],p1=spine[1];
+    const fA=Math.atan2(p1.x-p0.x,p1.z-p0.z);
+    const clGeo=new THREE.PlaneGeometry(RW,4);clGeo.rotateX(-Math.PI/2);clGeo.rotateY(fA);
+    const ccv=document.createElement('canvas');ccv.width=128;ccv.height=32;const cctx=ccv.getContext('2d');
+    cctx.fillStyle='#fff';cctx.fillRect(0,0,128,32);cctx.fillStyle='#000';for(let x=0;x<128;x+=16)for(let y=0;y<32;y+=16)if((x/16+y/16)%2===0)cctx.fillRect(x,y,16,16);
+    const cTex=new THREE.CanvasTexture(ccv);const clMesh=new THREE.Mesh(clGeo,new THREE.MeshLambertMaterial({map:cTex}));clMesh.position.set(p0.x,0.05,p0.z);grp.add(clMesh);
+    const gt=new THREE.Group();gt.position.set(p0.x,0,p0.z);gt.rotation.y=fA;
+    const poleMat=new THREE.MeshLambertMaterial({color:0xcccccc});
+    for(const s of[-1,1]){const pil=new THREE.Mesh(new THREE.CylinderGeometry(1.5,1.5,20),poleMat);pil.position.set(s*(RW/2+3),10,0);gt.add(pil);}
+    const sb=new THREE.Mesh(new THREE.BoxGeometry(RW+10,6,2),new THREE.MeshLambertMaterial({color:0xe52521}));sb.position.set(0,20,0);gt.add(sb);grp.add(gt);
+    let spawned=0,attempts=0;
+    while(spawned<45&&attempts<2500){attempts++;let px=(Math.random()-.5)*1100,pz=(Math.random()-.5)*1100,radius=20+Math.random()*40,tooClose=false;for(let j=0;j<spine.length;j++){let dx=px-spine[j].x,dz=pz-spine[j].z;if(dx*dx+dz*dz<(radius+50)**2){tooClose=true;break;}}if(tooClose)continue;const hill=new THREE.Mesh(new THREE.SphereGeometry(radius,16,12,0,Math.PI*2,0,Math.PI/2),new THREE.MeshLambertMaterial({color:0x5ab533}));hill.position.set(px,-2,pz);hill.scale.y=0.4+Math.random()*0.3;grp.add(hill);spawned++;}
     scene.add(grp);
-    return {grp, itemPos:buildItemPos()};
+    return{grp,itemPos:buildItemPos()};
   }
-
   function buildItemPos(){
     const out=[],tot=spine.length,step=Math.floor(tot/8);
-    for(let i=Math.floor(step*.5);i<tot;i+=step){
-      const p=spine[i],nm=norms[i];
-      out.push(v3(p.x, 2.0, p.z));
-      out.push(v3(p.x+nm.x*10, 2.0, p.z+nm.z*10));
-      out.push(v3(p.x-nm.x*10, 2.0, p.z-nm.z*10));
-    }
+    for(let i=Math.floor(step*.5);i<tot;i+=step){const p=spine[i],nm=norms[i];out.push(v3(p.x,2,p.z),v3(p.x+nm.x*10,2,p.z+nm.z*10),v3(p.x-nm.x*10,2,p.z-nm.z*10));}
     return out;
   }
-  
   function startPositions(){
-    const p=spine[0],nm=norms[0],nx=spine[1];
+    const p=spine[0],nx=spine[1];
     const fdx=nx.x-p.x,fdz=nx.z-p.z,fl=Math.sqrt(fdx*fdx+fdz*fdz)||1;
     const angle=Math.atan2(fdx/fl,fdz/fl);
-    const posList = [];
-    // Dynamic starting grid for up to 8 racers
-    for(let i=0; i<8; i++){
-        let row = Math.floor(i/2);
-        let side = (i%2===0) ? 1 : -1;
-        let offsetZ = row * 8; // spacing backwards
-        let offsetX = side * 7; // spacing sideways
-        if(i===0) { offsetX = 3; offsetZ = 0; } // Pole position slightly tweaked
-        
-        posList.push({
-            pos: v3(p.x-(fdx/fl)*(8+offsetZ)+nm.x*offsetX, 0.6, p.z-(fdz/fl)*(8+offsetZ)+nm.z*offsetX),
-            angle: angle
-        });
+    const posList=[];
+    for(let i=0;i<8;i++){
+      let row=Math.floor(i/2),side=(i%2===0)?1:-1;
+      let offsetZ=row*8,offsetX=side*7;
+      if(i===0){offsetX=3;offsetZ=0;}
+      posList.push({pos:v3(p.x-(fdx/fl)*(8+offsetZ)+norms[0].x*offsetX,0.6,p.z-(fdz/fl)*(8+offsetZ)+norms[0].z*offsetX),angle});
     }
     return posList;
   }
-  return {init(){buildSpine();},buildScene,getSpine(){return spine;},getNorms(){return norms;},getWaypts(){return waypts;},getCpts(){return cpts;},nearestIdx,onRoad,roadFrac,startPositions,RW};
+  return{init(){buildSpine();},buildScene,getSpine(){return spine;},getNorms(){return norms;},getWaypts(){return waypts;},getCpts(){return cpts;},nearestIdx,onRoad,roadFrac,startPositions,RW};
 })();
 
 // ══════════════════════════════════════════════════════════════
-//  PHYSICS & CONTROLS (Drift completely removed)
+//  PHYSICS
 // ══════════════════════════════════════════════════════════════
-const PH={
-  ENG: 110, BRK: 160, REV: 40,
-  MAX: 95, MAXR: 25, BOOST: 140, OFFMAX: 35,
-  DRAG: .975, ODRAG: .85,
-  STEER: 2.8, STEERLG: 2.0,
-  GSLIP: .75, 
-  GY: 0.0, KR: 2.2, KMH_SCALE: 2.5,
-};
+const PH={ENG:110,BRK:160,REV:40,MAX:95,MAXR:25,BOOST:140,OFFMAX:35,DRAG:.975,ODRAG:.85,STEER:2.8,STEERLG:2.0,GSLIP:.75,GY:0,KR:2.2,KMH_SCALE:2.5};
 
 class Body{
-  constructor(pos,angle, isRemote = false){
-    this.p=pos.clone(); this.v=v3();
-    this.h=angle; this.spd=0;
-    this.boost=false; this.btimer=0;
-    this.stun=0; this.shield=false; this.stimer=0;
-    this.fx=0; this.fz=1;
-    this.isRemote = isRemote;
-    
-    // Smooth steering interpolation variable
-    this.steerVal=0;
+  constructor(pos,angle,isRemote=false){
+    this.p=pos.clone();this.v=v3();this.h=angle;this.spd=0;
+    this.boost=false;this.btimer=0;this.stun=0;this.shield=false;this.stimer=0;
+    this.fx=0;this.fz=1;this.isRemote=isRemote;this.steerVal=0;
   }
   step(inp,dt,onRoad){
     if(this.stun>0){this.stun-=dt;inp={throttle:0,brake:0,steerLeft:0,steerRight:0};}
     if(this.stimer>0){this.stimer-=dt;this.shield=this.stimer>0;}
     if(this.btimer>0){this.boost=true;this.btimer-=dt;}else this.boost=false;
-
-    const dragBase=onRoad ? PH.DRAG : PH.ODRAG;
-    this.v.multiplyScalar(Math.pow(dragBase,dt*60));
-
-    this.fx=Math.sin(this.h); this.fz=Math.cos(this.h);
-    let fs=this.v.x*this.fx+this.v.z*this.fz;
-    let ls=this.v.x*this.fz-this.v.z*this.fx;
-
+    this.v.multiplyScalar(Math.pow(onRoad?PH.DRAG:PH.ODRAG,dt*60));
+    this.fx=Math.sin(this.h);this.fz=Math.cos(this.h);
+    let fs=this.v.x*this.fx+this.v.z*this.fz,ls=this.v.x*this.fz-this.v.z*this.fx;
     const mxs=this.boost?PH.BOOST:(!onRoad?PH.OFFMAX:PH.MAX);
-    
-    if(inp.throttle&&fs<mxs) fs+=PH.ENG*dt;
+    if(inp.throttle&&fs<mxs)fs+=PH.ENG*dt;
     if(inp.brake){if(fs>.5)fs-=PH.BRK*dt;else if(fs>-PH.MAXR)fs-=PH.REV*dt;}
     fs=clamp(fs,-PH.MAXR,mxs);
-
     const aspd=Math.abs(fs),sr=clamp(aspd/(PH.MAX+15),0,1);
     const steerMax=lerp(PH.STEER,PH.STEERLG,sr);
-    
-    // SMOOTH STEERING INTERPOLATION
-    let targetSi = inp.steerRight - inp.steerLeft;
-    let dSi = targetSi - this.steerVal;
-    let maxDelta = dt * (targetSi !== 0 ? 5.0 : 10.0);
-    this.steerVal += clamp(dSi, -maxDelta, maxDelta);
-    let si = this.steerVal;
-
-    if(aspd>.5){
-      this.h+=si*steerMax*sr*(fs<0?-1:1)*dt;
-    }
-
+    let targetSi=inp.steerRight-inp.steerLeft;
+    let dSi=targetSi-this.steerVal;
+    this.steerVal+=clamp(dSi,-dt*(targetSi!==0?5:10),dt*(targetSi!==0?5:10));
+    if(aspd>.5)this.h+=this.steerVal*steerMax*sr*(fs<0?-1:1)*dt;
     ls*=Math.pow(PH.GSLIP,dt*60);
-    this.v.x=this.fx*fs+this.fz*ls; this.v.z=this.fz*fs-this.fx*ls; this.v.y=0;
-    this.p.x+=this.v.x*dt; this.p.z+=this.v.z*dt; this.p.y=PH.GY;
-    this.spd=fs;
+    this.v.x=this.fx*fs+this.fz*ls;this.v.z=this.fz*fs-this.fx*ls;this.v.y=0;
+    this.p.x+=this.v.x*dt;this.p.z+=this.v.z*dt;this.p.y=PH.GY;this.spd=fs;
   }
-  hit(vec){
-      if(this.shield)return;
-      this.v.add(vec);this.stun=1.2;this.btimer=0;
-  }
-  addBoost(d){this.btimer=Math.max(this.btimer, d);}
+  hit(vec){if(this.shield)return;this.v.add(vec);this.stun=1.2;this.btimer=0;}
+  addBoost(d){this.btimer=Math.max(this.btimer,d);}
   addShield(d){this.stimer=d;this.shield=true;}
   get kmh(){return Math.round(clamp(Math.abs(this.spd)*PH.KMH_SCALE,0,320));}
 }
 
 function resolveCollisions(bodies){
-  for(let i=0;i<bodies.length;i++) for(let j=i+1;j<bodies.length;j++){
+  for(let i=0;i<bodies.length;i++)for(let j=i+1;j<bodies.length;j++){
     const a=bodies[i],b=bodies[j],dx=b.p.x-a.p.x,dz=b.p.z-a.p.z,d2=dx*dx+dz*dz,md=PH.KR*2;
     if(d2<md*md&&d2>.01){
       const d=Math.sqrt(d2),nx=dx/d,nz=dz/d,rv=(b.v.x-a.v.x)*nx+(b.v.z-a.v.z)*nz;
-      if(rv<0){
-          const im=rv*.6;
-          if (!a.isRemote) { a.v.x+=im*nx; a.v.z+=im*nz; }
-          if (!b.isRemote) { b.v.x-=im*nx; b.v.z-=im*nz; }
-      }
-      const push=(md-d)*.5+.01;
-      if (!a.isRemote) { a.p.x-=nx*push; a.p.z-=nz*push; }
-      if (!b.isRemote) { b.p.x+=nx*push; b.p.z+=nz*push; }
+      if(rv<0){const im=rv*.6;if(!a.isRemote){a.v.x+=im*nx;a.v.z+=im*nz;}if(!b.isRemote){b.v.x-=im*nx;b.v.z-=im*nz;}}
+      const push=(md-d)*.5+.01;if(!a.isRemote){a.p.x-=nx*push;a.p.z-=nz*push;}if(!b.isRemote){b.p.x+=nx*push;b.p.z+=nz*push;}
     }
   }
 }
-
 function resolveWall(body){
-  if (body.isRemote) return; // Remote physics controlled by network
+  if(body.isRemote)return;
   const frac=Track.roadFrac(body.p);
   if(frac<=0){
     const i=Track.nearestIdx(body.p),s=Track.getSpine()[i];
     const dx=s.x-body.p.x,dz=s.z-body.p.z,d=Math.sqrt(dx*dx+dz*dz);
-    if(d>.05){
-      const nx=dx/d,nz=dz/d,dot=body.v.x*nx+body.v.z*nz;
-      if(dot<0){ body.v.x-=dot*nx*1.2; body.v.z-=dot*nz*1.2; }
-      body.v.x*=0.85; body.v.z*=0.85;
-      const overlap=d-Track.RW*.46;
-      if(overlap>0){ body.p.x+=nx*overlap; body.p.z+=nz*overlap; }
-    }
+    if(d>.05){const nx=dx/d,nz=dz/d,dot=body.v.x*nx+body.v.z*nz;if(dot<0){body.v.x-=dot*nx*1.2;body.v.z-=dot*nz*1.2;}body.v.x*=0.85;body.v.z*=0.85;const overlap=d-Track.RW*.46;if(overlap>0){body.p.x+=nx*overlap;body.p.z+=nz*overlap;}}
   }
 }
-
 
 // ══════════════════════════════════════════════════════════════
 //  KART VISUALS
 // ══════════════════════════════════════════════════════════════
-const KC=[{b:0xff1111,t:0xffffff},{b:0x1144ff,t:0x00ffff},{b:0x11dd44,t:0xffff00},{b:0xdd22dd,t:0xffaaff}];
+const KC=[{b:0xff1111,t:0xffffff},{b:0x1144ff,t:0x00ffff},{b:0x11dd44,t:0xffff00},{b:0xdd22dd,t:0xffaaff},{b:0xff8800,t:0xffff00},{b:0x00dddd,t:0xffffff},{b:0xffdd00,t:0xff4400},{b:0xaa00ff,t:0xffaaff}];
 
 class KartVis{
   constructor(idx,scene){
     this.g=new THREE.Group();
-    // Wrap around colors for up to 8 racers
-    const c=KC[idx%4];
-    const bm=new THREE.MeshLambertMaterial({color:c.b, roughness:0.2}); 
-    const tm=new THREE.MeshLambertMaterial({color:c.t}); 
-    const dm=new THREE.MeshLambertMaterial({color:0x111111, roughness:0.9}); 
-    const mm=new THREE.MeshLambertMaterial({color:0xaaaaaa, metalness:0.8, roughness:0.2}); 
-    
-    this.chassis=new THREE.Mesh(new THREE.BoxGeometry(1.8,0.4,3.4),bm);
-    this.chassis.position.y=0.4; this.chassis.castShadow=true; this.g.add(this.chassis);
-    
-    const nose=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.9,1.5,8),bm);
-    nose.rotation.x=Math.PI/2; nose.position.set(0,0.4,2.0); nose.castShadow=true; this.g.add(nose);
-    
-    const sp1=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.1,0.6),tm);
-    sp1.position.set(0,1.2,-1.5); sp1.castShadow=true; this.g.add(sp1);
-    const spL=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.6,0.6),tm);
-    spL.position.set(1.0,0.9,-1.5); this.g.add(spL);
-    const spR=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.6,0.6),tm);
-    spR.position.set(-1.0,0.9,-1.5); this.g.add(spR);
-    
-    this.exL = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.15,0.4,8),mm);
-    this.exL.rotation.x = Math.PI/2; this.exL.position.set(0.5,0.4,-1.8); this.g.add(this.exL);
-    this.exR = new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.15,0.4,8),mm);
-    this.exR.rotation.x = Math.PI/2; this.exR.position.set(-0.5,0.4,-1.8); this.g.add(this.exR);
-
-    const driver=new THREE.Mesh(new THREE.CylinderGeometry(0.5,0.6,0.8),c.t===0xffffff?new THREE.MeshLambertMaterial({color:0xdddddd}):tm);
-    driver.position.set(0,0.8,-0.2); driver.castShadow=true; this.g.add(driver);
-    const helm=new THREE.Mesh(new THREE.SphereGeometry(0.4,16,16),tm);
-    helm.position.set(0,1.4,-0.2); helm.castShadow=true; this.g.add(helm);
-    const visor=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.25,0.3),new THREE.MeshLambertMaterial({color:0x111111, metalness:0.8, roughness:0.1}));
-    visor.position.set(0,1.4,0.1); this.g.add(visor);
-
+    const c=KC[idx%KC.length];
+    const bm=new THREE.MeshLambertMaterial({color:c.b});const tm=new THREE.MeshLambertMaterial({color:c.t});const dm=new THREE.MeshLambertMaterial({color:0x111111});const mm=new THREE.MeshLambertMaterial({color:0xaaaaaa});
+    this.chassis=new THREE.Mesh(new THREE.BoxGeometry(1.8,.4,3.4),bm);this.chassis.position.y=.4;this.chassis.castShadow=true;this.g.add(this.chassis);
+    const nose=new THREE.Mesh(new THREE.CylinderGeometry(.5,.9,1.5,8),bm);nose.rotation.x=Math.PI/2;nose.position.set(0,.4,2.0);this.g.add(nose);
+    const sp1=new THREE.Mesh(new THREE.BoxGeometry(2.2,.1,.6),tm);sp1.position.set(0,1.2,-1.5);this.g.add(sp1);
+    const driver=new THREE.Mesh(new THREE.CylinderGeometry(.5,.6,.8),tm);driver.position.set(0,.8,-.2);this.g.add(driver);
+    const helm=new THREE.Mesh(new THREE.SphereGeometry(.4,16,16),tm);helm.position.set(0,1.4,-.2);this.g.add(helm);
     this.wheels=[];
-    const wGeo = new THREE.CylinderGeometry(0.45,0.45,0.4,16);
+    const wGeo=new THREE.CylinderGeometry(.45,.45,.4,16);
     for(const[wx,wz] of[[1.1,1.2],[-1.1,1.2],[1.1,-1.2],[-1.1,-1.2]]){
-      const w=new THREE.Mesh(wGeo,dm);
-      w.rotation.z=Math.PI/2; w.position.set(wx,0.45,wz); w.castShadow=true;
-      const hub=new THREE.Mesh(new THREE.CylinderGeometry(0.2,0.2,0.42,8),mm);
-      hub.rotation.z=Math.PI/2; hub.position.copy(w.position);
-      this.g.add(w); this.g.add(hub);
-      this.wheels.push({w,hub});
+      const w=new THREE.Mesh(wGeo,dm);w.rotation.z=Math.PI/2;w.position.set(wx,.45,wz);w.castShadow=true;
+      const hub=new THREE.Mesh(new THREE.CylinderGeometry(.2,.2,.42,8),mm);hub.rotation.z=Math.PI/2;hub.position.copy(w.position);
+      this.g.add(w);this.g.add(hub);this.wheels.push({w,hub});
     }
-    
-    this._sm=null; scene.add(this.g);
+    this._sm=null;scene.add(this.g);
   }
   update(body,dt){
-    this.g.position.copy(body.p); this.g.rotation.y=body.h;
-    
-    let tiltTarget = -body.steerVal * 0.12; // Visually lean when steering
-    this.g.rotation.z = lerp(this.g.rotation.z, tiltTarget, 0.15);
-    
+    this.g.position.copy(body.p);this.g.rotation.y=body.h;
+    this.g.rotation.z=lerp(this.g.rotation.z,-body.steerVal*.12,.15);
     const spin=body.spd*1.8;
-    for(let i=0; i<4; i++){
-        this.wheels[i].w.rotation.x += spin*dt;
-        this.wheels[i].hub.rotation.x += spin*dt;
-        if(i<2){ 
-            this.wheels[i].w.rotation.y = -(body.steerVal*0.3); 
-        }
-    }
+    for(let i=0;i<4;i++){this.wheels[i].w.rotation.x+=spin*dt;this.wheels[i].hub.rotation.x+=spin*dt;if(i<2)this.wheels[i].w.rotation.y=-(body.steerVal*.3);}
   }
   setShield(on){
-    if(!this._sm){
-      this._sm=new THREE.Mesh(new THREE.SphereGeometry(2.5,16,12),
-        new THREE.MeshPhysicalMaterial({color:0x3399ff,transparent:true,opacity:0.4,transmission:0.5,roughness:0.1,depthWrite:false}));
-      this._sm.position.y=1.0; this.g.add(this._sm);
-    }
+    if(!this._sm){this._sm=new THREE.Mesh(new THREE.SphereGeometry(2.5,16,12),new THREE.MeshPhysicalMaterial({color:0x3399ff,transparent:true,opacity:.4,depthWrite:false}));this._sm.position.y=1.0;this.g.add(this._sm);}
     this._sm.visible=on;
   }
   remove(scene){scene.remove(this.g);}
@@ -906,279 +790,95 @@ class KartVis{
 // ══════════════════════════════════════════════════════════════
 class Racer{
   constructor(idx,isPlayer,startPos,scene,cps,laps){
-    this.idx=idx; this.isPlayer=isPlayer; this.totalLaps=laps;
-    this.body=new Body(startPos.pos,startPos.angle, false);
+    this.idx=idx;this.isPlayer=isPlayer;this.totalLaps=laps;
+    this.body=new Body(startPos.pos,startPos.angle,false);
     this.vis=new KartVis(idx,scene);
-    this.lap=1; this.cpHit=new Set(); this.cpHit.add(0);
-    this.nextCp=1;
-    this.done=false; this.racePos=idx+1; this.spIdx=0;
-    this.item=null; this._cps=cps; this._scene=scene;
+    this.lap=1;this.cpHit=new Set();this.cpHit.add(0);
+    this.nextCp=1;this.done=false;this.racePos=idx+1;this.spIdx=0;
+    this.item=null;this._cps=cps;this._scene=scene;
   }
   update(inp,dt){
-    if(this.done) {
-        if(this.isPlayer) AudioSys.updateEngine(0, true);
-        return;
-    }
+    if(this.done){if(this.isPlayer)AudioSys.updateEngine(0,true);return;}
     const road=Track.onRoad(this.body.p);
     if(inp)this.body.step(inp,dt,road);
-    this.spIdx=Track.nearestIdx(this.body.p, this.spIdx);
+    this.spIdx=Track.nearestIdx(this.body.p,this.spIdx);
     this.vis.update(this.body,dt);
     this.vis.setShield(this.body.shield);
-    
-    if(this.isPlayer) {
-        AudioSys.updateEngine(Math.abs(this.body.spd) / PH.MAX, true);
-    }
-
-    if(this.body.boost && Math.random()<0.4){
-        let px=this.body.p.x - this.body.fx*1.8;
-        let pz=this.body.p.z - this.body.fz*1.8;
-        Parts.spawnFlame(v3(px,0.6,pz));
-    }
-
+    if(this.isPlayer)AudioSys.updateEngine(Math.abs(this.body.spd)/PH.MAX,true);
+    if(this.body.boost&&Math.random()<.4)Parts.spawnFlame(v3(this.body.p.x-this.body.fx*1.8,.6,this.body.p.z-this.body.fz*1.8));
     this._checkCPs();
   }
-  
   _checkCPs(){
     if(!this._cps||!this._cps.length)return;
-    
-    let hitIdx = -1;
-    
-    // Give Finish Line a smaller strict radius to prevent ending before you actually hit the line
-    // Give normal checkpoints a huge radius so you don't miss them going wide
-    for (let i=0; i<3; i++) {
-        let checkIdx = (this.nextCp + i) % this._cps.length;
-        let cp = this._cps[checkIdx];
-        let dx = this.body.p.x - cp.cx;
-        let dz = this.body.p.z - cp.cz;
-        
-        let radiusSq = (cp.finish) ? 1600 : 8100; // 40 radius for finish line, 90 radius for normal CPs
-
-        if (dx*dx + dz*dz < radiusSq) {
-            hitIdx = checkIdx;
-            break; 
-        }
-    }
-
-    if(hitIdx !== -1){
-      let i = this.nextCp;
-      while(true) {
-          this.cpHit.add(i);
-          if (i === hitIdx) break;
-          i = (i + 1) % this._cps.length;
-      }
-      
-      const wasF=this._cps[hitIdx].finish;
-      this.nextCp=(hitIdx+1)%this._cps.length;
-      
-      if(wasF && this.cpHit.size > this._cps.length / 2){
-        if(this.lap === 1 && this.cpHit.size < this._cps.length - 2) return;
-
-        this.cpHit.clear();
-        this.cpHit.add(0); 
-        
-        if(this.lap < this.totalLaps){
-            this.lap++;
-            if(this.isPlayer) UI.lapBanner(this.lap,this.totalLaps);
-        } else {
-            this.done=true;
-            if(this.isPlayer) {
-                window._raceDone=true;
-                AudioSys.mute();
-            }
-        }
+    let hitIdx=-1;
+    for(let i=0;i<3;i++){let ci=(this.nextCp+i)%this._cps.length,cp=this._cps[ci],dx=this.body.p.x-cp.cx,dz=this.body.p.z-cp.cz,rsq=cp.finish?1600:8100;if(dx*dx+dz*dz<rsq){hitIdx=ci;break;}}
+    if(hitIdx!==-1){
+      let i=this.nextCp;while(true){this.cpHit.add(i);if(i===hitIdx)break;i=(i+1)%this._cps.length;}
+      const wasF=this._cps[hitIdx].finish;this.nextCp=(hitIdx+1)%this._cps.length;
+      if(wasF&&this.cpHit.size>this._cps.length/2){
+        if(this.lap===1&&this.cpHit.size<this._cps.length-2)return;
+        this.cpHit.clear();this.cpHit.add(0);
+        if(this.lap<this.totalLaps){this.lap++;if(this.isPlayer)UI.lapBanner(this.lap,this.totalLaps);}
+        else{this.done=true;if(this.isPlayer){window._raceDone=true;AudioSys.mute();}}
       }
     }
   }
   fireItem(all){
     if(!this.item)return;
-    const t=this.item; this.item=null;
-    if(this.isPlayer) UI.setItem(null);
-    if(this.isPlayer) AudioSys.playItem();
-    
-    if(t==='boost'){
-      this.body.addBoost(2.5);
-      if(this.isPlayer){ UI.flash('⚡ SPEED BOOST!',0xffcc00); }
-      Parts.spawnRing(this.body.p, 0xff3333);
-    } else if(t==='missile'){
+    const t=this.item;this.item=null;
+    if(this.isPlayer){UI.setItem(null);}
+    if(this.isPlayer)AudioSys.playItem();
+    if(t==='boost'){this.body.addBoost(2.5);if(this.isPlayer)UI.flash('⚡ SPEED BOOST!',0xffcc00);Parts.spawnRing(this.body.p,0xff3333);}
+    else if(t==='missile'){
       let best=null,bd=Infinity;
-      for(const r of all){
-        if(r===this||r.done || r.isRemote)continue;
-        let relx = r.body.p.x - this.body.p.x;
-        let relz = r.body.p.z - this.body.p.z;
-        let dot = relx*this.body.fx + relz*this.body.fz;
-        if(dot > 0 || !this.isPlayer){ 
-            const d=relx*relx+relz*relz;
-            if(d<bd){bd=d;best=r;}
-        }
-      }
+      for(const r of all){if(r===this||r.done||r.isRemote)continue;const relx=r.body.p.x-this.body.p.x,relz=r.body.p.z-this.body.p.z,dot=relx*this.body.fx+relz*this.body.fz;if(dot>0||!this.isPlayer){const d=relx*relx+relz*relz;if(d<bd){bd=d;best=r;}}}
       const missile=new MissileProjectile(this.body,best,this._scene);
       const firer=this;
-      missile._onHit=function(hitPos){
-        Parts.explode(hitPos);
-        if(best&&!best.body.shield){
-          const dx=best.body.p.x-firer.body.p.x,dz=best.body.p.z-firer.body.p.z;
-          const d=Math.sqrt(dx*dx+dz*dz)||1;
-          best.body.hit(v3(dx/d*45,0,dz/d*45));
-          if(best.isPlayer){UI.hitFlash();UI.flash('💥 HIT!',0xff2222);Cam.shake(1.5);}
-        } else if(best&&best.body.shield){
-          if(best.isPlayer) UI.flash('🛡 BLOCKED!',0x3caaff);
-        }
-      };
-      activeMissiles.push(missile);
-      if(this.isPlayer) UI.flash('🚀 MISSILE FIRED!',0x3cff88);
-    } else if(t==='shield'){
-      this.body.addShield(8);
-      if(this.isPlayer) UI.flash('🛡 SHIELD ACTIVE!',0x3caaff);
-    }
+      missile._onHit=function(hitPos){Parts.explode(hitPos);if(best&&!best.body.shield){const dx=best.body.p.x-firer.body.p.x,dz=best.body.p.z-firer.body.p.z,d=Math.sqrt(dx*dx+dz*dz)||1;best.body.hit(v3(dx/d*45,0,dz/d*45));if(best.isPlayer){UI.hitFlash();UI.flash('💥 HIT!',0xff2222);Cam.shake(1.5);}}else if(best&&best.body.shield&&best.isPlayer)UI.flash('🛡 BLOCKED!',0x3caaff);};
+      activeMissiles.push(missile);if(this.isPlayer)UI.flash('🚀 MISSILE FIRED!',0x3cff88);
+    }else if(t==='shield'){this.body.addShield(8);if(this.isPlayer)UI.flash('🛡 SHIELD ACTIVE!',0x3caaff);}
   }
-  giveItem(t){
-      if(this.item)return;
-      this.item=t;
-      if(this.isPlayer){UI.setItem(t);}
-  }
+  giveItem(t){if(this.item)return;this.item=t;if(this.isPlayer)UI.setItem(t);}
   progress(){if(this.done)return Infinity;return(this.lap-1)*Track.getSpine().length+this.spIdx;}
   destroy(){this.vis.remove(this._scene);}
 }
 
 // ══════════════════════════════════════════════════════════════
-//  ENHANCED AI (PURE RACING ALGORITHM)
+//  AI
 // ══════════════════════════════════════════════════════════════
 class AI{
-  constructor(racer,skill){
-    this.r=racer; 
-    this.skill=skill; 
-    this.maxSpeedFactor = 0.7 + (skill * 0.5); 
-    this.inp={throttle:1,brake:0,steerLeft:0,steerRight:0,useItem:false};
-    this._stT=0; 
-    this._revT=0;
-    this._revDir=1;
-  }
-  
+  constructor(racer,skill){this.r=racer;this.skill=skill;this.inp={throttle:1,brake:0,steerLeft:0,steerRight:0,useItem:false};this._stT=0;this._revT=0;this._revDir=1;}
   update(dt,all){
-    const r=this.r, b=r.body, spine=Track.getSpine(), spTot=spine.length;
-    if(!spTot||r.done){this.inp.throttle=0;b.step(this.inp,dt,Track.onRoad(b.p, r.spIdx));return;}
-    
-    // 1. UNSTUCK REVERSE LOGIC
-    if (this._revT > 0) {
-      this._revT -= dt;
-      this.inp.throttle = 0;
-      this.inp.brake = 1; 
-      this.inp.steerRight = this._revDir > 0 ? 1 : 0;
-      this.inp.steerLeft = this._revDir < 0 ? 1 : 0;
-      b.step(this.inp, dt, Track.onRoad(b.p, r.spIdx));
-      return;
-    }
-
-    // 2. DYNAMIC LOOK-AHEAD
-    const speedRatio = Math.abs(b.spd) / PH.MAX;
-    
-    const steerLookAhead = Math.floor(10 + speedRatio * 15); 
-    const nearIdx = (r.spIdx + steerLookAhead) % spTot;
-    const near = spine[nearIdx];
-    
-    const brakeLookAhead = Math.floor(20 + speedRatio * 20);
-    const farIdx = (r.spIdx + brakeLookAhead) % spTot;
-    const far = spine[farIdx];
-    
-    // 3. TARGET ANGLE & WALL AVOIDANCE
-    let tx = near.x;
-    let tz = near.z;
-    
-    const roadFrac = Track.roadFrac(b.p, r.spIdx);
-    
-    if (roadFrac < 0.4) {
-        // Wall Avoidance: Force steer toward track center
-        const center = spine[(r.spIdx + 5) % spTot];
-        tx = center.x;
-        tz = center.z;
-    } else {
-        // Racing Line: Cut the corner
-        const nm = Track.getNorms()[nearIdx];
-        if (nm && this.skill > 0.6) {
-            const turnDir = adiff(
-                Math.atan2(far.x - near.x, far.z - near.z),
-                Math.atan2(near.x - b.p.x, near.z - b.p.z)
-            );
-            const offsetAmount = clamp(turnDir * -15, -10, 10) * this.skill;
-            tx += nm.x * offsetAmount;
-            tz += nm.z * offsetAmount;
-        }
-    }
-
-    let targetAngle = Math.atan2(tx - b.p.x, tz - b.p.z);
-    let steerError = adiff(targetAngle, b.h);
-    
-    steerError += rnd(-0.05, 0.05) * (1 - this.skill); // Add slight wobble based on skill
-
-    // 4. STEERING APPLICATION
-    const steerMultiplier = lerp(3.0, 6.0, this.skill); 
-    const sa = clamp(Math.abs(steerError) * steerMultiplier, 0, 1);
-    this.inp.steerLeft = this.inp.steerRight = 0;
-    if (steerError > 0.02) this.inp.steerRight = sa;
-    else if (steerError < -0.02) this.inp.steerLeft = sa;
-
-    // 5. RUBBER-BANDING & SPEED CONTROL
-    let playerProg = 0;
-    let myProg = r.progress();
-    for (let rx of all) { if (rx.isPlayer) playerProg = rx.progress(); }
-    
-    let catchUp = 1.0;
-    let distBehind = playerProg - myProg;
-    if (distBehind > 15) {
-        catchUp = 1.0 + (this.skill * 0.15); // Up to 15% faster if falling behind
-    } else if (distBehind < -30) {
-        catchUp = 0.9; // Slow down slightly if way ahead
-    }
-
-    let maxSpeed = PH.MAX * lerp(0.8, 1.0, this.skill) * catchUp;
-
-    const farAngle = Math.atan2(far.x - b.p.x, far.z - b.p.z);
-    const turnSharpness = Math.abs(adiff(farAngle, b.h));
-
-    if (Math.abs(b.spd) > maxSpeed) {
-        this.inp.throttle = 0;
-        this.inp.brake = 0;
-    } else {
-        // Slow down smoothly for turns instead of slamming brakes
-        const cornerTolerance = lerp(0.3, 0.6, this.skill);
-        if (turnSharpness > cornerTolerance && Math.abs(b.spd) > PH.MAX * 0.5) {
-            this.inp.throttle = 0;
-            this.inp.brake = clamp((turnSharpness - cornerTolerance) * 2, 0, 1);
-        } else {
-            if (roadFrac < 0.2) {
-                this.inp.throttle = 0.6; // Don't full throttle if slipping off road
-                this.inp.brake = 0;
-            } else {
-                this.inp.throttle = 1;
-                this.inp.brake = 0;
-            }
-        }
-    }
-
-    // 6. SMART ITEM USAGE
-    this.inp.useItem = false;
-    if(r.item && Math.random() < 0.03) {
-        if (r.item === 'boost' && turnSharpness < 0.2) this.inp.useItem = true;
-        else if (r.item === 'missile' && distBehind > 0) this.inp.useItem = true;
-        else if (r.item === 'shield') this.inp.useItem = true;
-    }
-    if(this.inp.useItem) r.fireItem(all);
-
-    // 7. STUCK DETECTION (Proper speed-based check)
-    if(!this._stP){this._stP=b.p.clone();this._stT=0;}
-    
-    if (Math.abs(b.spd) < 5.0 && this.inp.throttle > 0) {
-        this._stT += dt;
-        if(this._stT > 1.2) { 
-            this._revT = 1.0; // Reverse for 1 second
-            this._revDir = (Math.random() > 0.5) ? -1 : 1; 
-            this._stT = 0;
-        }
-    } else {
-        this._stT = 0;
-    }
-    
-    b.step(this.inp, dt, Track.onRoad(b.p, r.spIdx));
+    const r=this.r,b=r.body,spine=Track.getSpine(),spTot=spine.length;
+    if(!spTot||r.done){this.inp.throttle=0;b.step(this.inp,dt,Track.onRoad(b.p,r.spIdx));return;}
+    if(this._revT>0){this._revT-=dt;this.inp.throttle=0;this.inp.brake=1;this.inp.steerRight=this._revDir>0?1:0;this.inp.steerLeft=this._revDir<0?1:0;b.step(this.inp,dt,Track.onRoad(b.p,r.spIdx));return;}
+    const sr=Math.abs(b.spd)/PH.MAX;
+    const nearIdx=(r.spIdx+Math.floor(10+sr*15))%spTot;
+    const farIdx=(r.spIdx+Math.floor(20+sr*20))%spTot;
+    const near=spine[nearIdx],far=spine[farIdx];
+    const roadFrac=Track.roadFrac(b.p,r.spIdx);
+    let tx=near.x,tz=near.z;
+    if(roadFrac<0.4){const c=spine[(r.spIdx+5)%spTot];tx=c.x;tz=c.z;}
+    let targetAngle=Math.atan2(tx-b.p.x,tz-b.p.z);
+    let steerError=adiff(targetAngle,b.h)+rnd(-.05,.05)*(1-this.skill);
+    const sa=clamp(Math.abs(steerError)*lerp(3,6,this.skill),0,1);
+    this.inp.steerLeft=this.inp.steerRight=0;
+    if(steerError>.02)this.inp.steerRight=sa;else if(steerError<-.02)this.inp.steerLeft=sa;
+    let playerProg=0,myProg=r.progress();
+    for(const rx of all)if(rx.isPlayer)playerProg=rx.progress();
+    let catchUp=1,distBehind=playerProg-myProg;
+    if(distBehind>15)catchUp=1+this.skill*.15;else if(distBehind<-30)catchUp=.9;
+    const maxSpeed=PH.MAX*lerp(.8,1,this.skill)*catchUp;
+    const farAngle=Math.atan2(far.x-b.p.x,far.z-b.p.z);
+    const turnSharpness=Math.abs(adiff(farAngle,b.h));
+    if(Math.abs(b.spd)>maxSpeed){this.inp.throttle=0;this.inp.brake=0;}
+    else{const ct=lerp(.3,.6,this.skill);if(turnSharpness>ct&&Math.abs(b.spd)>PH.MAX*.5){this.inp.throttle=0;this.inp.brake=clamp((turnSharpness-ct)*2,0,1);}else{this.inp.throttle=roadFrac<.2?.6:1;this.inp.brake=0;}}
+    this.inp.useItem=false;
+    if(r.item&&Math.random()<.03){if(r.item==='boost'&&turnSharpness<.2)this.inp.useItem=true;else if(r.item==='missile'&&distBehind>0)this.inp.useItem=true;else if(r.item==='shield')this.inp.useItem=true;}
+    if(this.inp.useItem)r.fireItem(all);
+    if(!this._stP)this._stP=b.p.clone();
+    if(Math.abs(b.spd)<5&&this.inp.throttle>0){this._stT+=dt;if(this._stT>1.2){this._revT=1;this._revDir=Math.random()>.5?-1:1;this._stT=0;}}else this._stT=0;
+    b.step(this.inp,dt,Track.onRoad(b.p,r.spIdx));
   }
 }
 
@@ -1188,251 +888,92 @@ class AI{
 class ItemBoxes{
   constructor(positions,scene){
     this._s=scene;this.list=[];
-    
     const cubeGeo=new THREE.BoxGeometry(3,3,3);
-    const cubeMat=new THREE.MeshPhysicalMaterial({
-        color: 0xffffff, transparent: true, opacity: 0.5,
-        roughness: 0.1, transmission: 0.9, thickness: 1.0, side: THREE.DoubleSide
-    });
-    
+    const cubeMat=new THREE.MeshPhysicalMaterial({color:0xffffff,transparent:true,opacity:.5,roughness:.1,transmission:.9,thickness:1,side:THREE.DoubleSide});
     const qGeo=new THREE.BoxGeometry(1.8,1.8,1.8);
-    const cv=document.createElement('canvas'); cv.width=64; cv.height=64;
-    const ctx=cv.getContext('2d');
-    ctx.fillStyle='#e52521'; ctx.fillRect(0,0,64,64); 
-    ctx.font='bold 48px Arial'; ctx.fillStyle='#ffffff'; ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText('?',32,36);
-    const tex=new THREE.CanvasTexture(cv);
-    const qMat=new THREE.MeshLambertMaterial({map:tex});
-
-    for(const pos of positions){
-      const grp = new THREE.Group();
-      grp.position.copy(pos);
-      const cube = new THREE.Mesh(cubeGeo, cubeMat);
-      const qblk = new THREE.Mesh(qGeo, qMat);
-      grp.add(cube); grp.add(qblk);
-      scene.add(grp);
-      this.list.push({grp, cube, qblk, pos:pos.clone(), on:true, timer:0});
-    }
+    const cv=document.createElement('canvas');cv.width=64;cv.height=64;const ctx=cv.getContext('2d');
+    ctx.fillStyle='#e52521';ctx.fillRect(0,0,64,64);ctx.font='bold 48px Arial';ctx.fillStyle='#ffffff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('?',32,36);
+    const tex=new THREE.CanvasTexture(cv);const qMat=new THREE.MeshLambertMaterial({map:tex});
+    for(const pos of positions){const grp=new THREE.Group();grp.position.copy(pos);const cube=new THREE.Mesh(cubeGeo,cubeMat);const qblk=new THREE.Mesh(qGeo,qMat);grp.add(cube);grp.add(qblk);scene.add(grp);this.list.push({grp,cube,qblk,pos:pos.clone(),on:true,timer:0});}
   }
   update(racers,dt){
     const t=Date.now()*.002;
     for(const b of this.list){
-      if(!b.on){
-        b.timer-=dt;
-        if(b.timer<=0){b.on=true;b.grp.visible=true;}
-        continue;
-      }
-      const bob=Math.sin(t*2+b.pos.x)*0.4;
-      b.grp.position.y=b.pos.y+bob;
-      b.cube.rotation.y = t; b.cube.rotation.x = t*0.5;
-      b.qblk.rotation.y = -t*1.5;
-      
-      for(const r of racers){
-        if(r.item || r.isRemote)continue;
-        const dx=b.pos.x-r.body.p.x,dz=b.pos.z-r.body.p.z;
-        if(dx*dx+dz*dz<16){
-          const pool=['boost','boost','missile','missile','shield'];
-          r.giveItem(pool[Math.floor(Math.random()*pool.length)]);
-          b.on=false;b.timer=5;b.grp.visible=false;
-          Parts.spawnSpark(b.pos, 0xffffff, 15);
-          break;
-        }
-      }
+      if(!b.on){b.timer-=dt;if(b.timer<=0){b.on=true;b.grp.visible=true;}continue;}
+      b.grp.position.y=b.pos.y+Math.sin(t*2+b.pos.x)*.4;b.cube.rotation.y=t;b.cube.rotation.x=t*.5;b.qblk.rotation.y=-t*1.5;
+      for(const r of racers){if(r.item)continue;const dx=b.pos.x-r.body.p.x,dz=b.pos.z-r.body.p.z;if(dx*dx+dz*dz<16){const pool=['boost','boost','missile','missile','shield'];r.giveItem(pool[Math.floor(Math.random()*pool.length)]);b.on=false;b.timer=5;b.grp.visible=false;Parts.spawnSpark(b.pos,0xffffff,15);break;}}
     }
   }
   destroy(){for(const b of this.list)this._s.remove(b.grp);}
 }
 
 // ══════════════════════════════════════════════════════════════
-//  MISSILE PROJECTILE
+//  MISSILE
 // ══════════════════════════════════════════════════════════════
 class MissileProjectile{
-  constructor(fromBody, target, scene){
-    this._s=scene; this.target=target; this.dead=false; this.life=4;
+  constructor(fromBody,target,scene){
+    this._s=scene;this.target=target;this.dead=false;this.life=4;
     const g=new THREE.Group();
-    const body=new THREE.Mesh(new THREE.CylinderGeometry(.25,.35,1.6,8),new THREE.MeshLambertMaterial({color:0x22cc44}));
-    body.rotation.x=Math.PI/2; g.add(body);
-    const nose=new THREE.Mesh(new THREE.ConeGeometry(.25,.6,8),new THREE.MeshLambertMaterial({color:0xffffff}));
-    nose.rotation.x=Math.PI/2; nose.position.z=1.1; g.add(nose);
-    
-    this.mesh=g;
-    this.p=fromBody.p.clone(); this.p.y=1.0;
-    const fx=Math.sin(fromBody.h),fz=Math.cos(fromBody.h);
-    this.p.x+=fx*3; this.p.z+=fz*3;
-    this.mesh.position.copy(this.p);
-    this.mesh.rotation.y=fromBody.h;
-    scene.add(this.mesh);
-    this.speed=140;
+    const body=new THREE.Mesh(new THREE.CylinderGeometry(.25,.35,1.6,8),new THREE.MeshLambertMaterial({color:0x22cc44}));body.rotation.x=Math.PI/2;g.add(body);
+    const nose=new THREE.Mesh(new THREE.ConeGeometry(.25,.6,8),new THREE.MeshLambertMaterial({color:0xffffff}));nose.rotation.x=Math.PI/2;nose.position.z=1.1;g.add(nose);
+    this.mesh=g;this.p=fromBody.p.clone();this.p.y=1.0;
+    const fx=Math.sin(fromBody.h),fz=Math.cos(fromBody.h);this.p.x+=fx*3;this.p.z+=fz*3;
+    this.mesh.position.copy(this.p);this.mesh.rotation.y=fromBody.h;scene.add(this.mesh);this.speed=140;
   }
   update(dt){
-    if(this.dead)return;
-    this.life-=dt;
-    if(this.life<=0){this.dead=true; this._s.remove(this.mesh); return;}
-    
-    Parts.spawnFlame(this.p, 0.4); 
-    
+    if(this.dead)return;this.life-=dt;if(this.life<=0){this.dead=true;this._s.remove(this.mesh);return;}
+    Parts.spawnFlame(this.p,.4);
     if(this.target&&!this.target.done){
-      const tp=this.target.body.p;
-      const dx=tp.x-this.p.x,dz=tp.z-this.p.z;
-      const dist=Math.sqrt(dx*dx+dz*dz);
-      const targetAngle=Math.atan2(dx,dz);
-      let diff=targetAngle-this.mesh.rotation.y;
-      while(diff>Math.PI)diff-=Math.PI*2;while(diff<-Math.PI)diff+=Math.PI*2;
+      const tp=this.target.body.p,dx=tp.x-this.p.x,dz=tp.z-this.p.z,dist=Math.sqrt(dx*dx+dz*dz);
+      const ta=Math.atan2(dx,dz);let diff=ta-this.mesh.rotation.y;while(diff>Math.PI)diff-=Math.PI*2;while(diff<-Math.PI)diff+=Math.PI*2;
       this.mesh.rotation.y+=clamp(diff,-.08,.08)*Math.min(1,dt*10);
-      
       const fx=Math.sin(this.mesh.rotation.y),fz=Math.cos(this.mesh.rotation.y);
-      this.p.x+=fx*this.speed*dt; this.p.z+=fz*this.speed*dt;
-      this.mesh.position.copy(this.p);
-      if(dist<5){this.dead=true; this._s.remove(this.mesh); return;}
-    } else {
-      const fx=Math.sin(this.mesh.rotation.y),fz=Math.cos(this.mesh.rotation.y);
-      this.p.x+=fx*this.speed*dt; this.p.z+=fz*this.speed*dt;
-      this.mesh.position.copy(this.p);
-    }
+      this.p.x+=fx*this.speed*dt;this.p.z+=fz*this.speed*dt;this.mesh.position.copy(this.p);
+      if(dist<5){this.dead=true;this._s.remove(this.mesh);return;}
+    }else{const fx=Math.sin(this.mesh.rotation.y),fz=Math.cos(this.mesh.rotation.y);this.p.x+=fx*this.speed*dt;this.p.z+=fz*this.speed*dt;this.mesh.position.copy(this.p);}
   }
 }
 
 // ══════════════════════════════════════════════════════════════
 //  PARTICLES
 // ══════════════════════════════════════════════════════════════
-const Parts = (()=>{
-  let pool=[], sceneRef=null;
-  const geo=new THREE.BoxGeometry(0.4,0.4,0.4);
-  
-  function init(scene){
-    sceneRef=scene; pool=[];
-    for(let i=0;i<120;i++){
-      const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0xffaa00,transparent:true}));
-      m.visible=false;scene.add(m);
-      pool.push({m,life:0,ml:1,vx:0,vy:0,vz:0,on:false});
-    }
-  }
+const Parts=(()=>{
+  let pool=[],sceneRef=null;const geo=new THREE.BoxGeometry(.4,.4,.4);
+  function init(scene){sceneRef=scene;pool=[];for(let i=0;i<120;i++){const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:0xffaa00,transparent:true}));m.visible=false;scene.add(m);pool.push({m,life:0,ml:1,vx:0,vy:0,vz:0,on:false});}}
   function _slot(){return pool.find(x=>!x.on)||null;}
-  
-  function spawnSpark(pos, col, count=2){
-    for(let i=0;i<count;i++){
-      const p=_slot();if(!p)break;
-      p.on=true; p.life=0.3+Math.random()*0.2; p.ml=p.life;
-      p.m.position.copy(pos); p.m.visible=true; p.m.material.opacity=1; p.m.material.color.setHex(col);
-      p.vx=rnd(-6,6); p.vy=rnd(2,8); p.vz=rnd(-6,6);
-      p.m.scale.setScalar(rnd(0.5, 1.2));
-    }
-  }
-  function spawnFlame(pos, sc=1){
-    const p=_slot();if(!p)return;
-    p.on=true; p.life=0.2; p.ml=0.2;
-    p.m.position.copy(pos); p.m.visible=true; p.m.material.opacity=0.8; 
-    p.m.material.color.setHex(Math.random()>0.5?0xffaa00:0xff3300);
-    p.vx=rnd(-2,2); p.vy=rnd(1,3); p.vz=rnd(-2,2);
-    p.m.scale.setScalar(sc*2);
-  }
-  function spawnRing(pos, col){
-      for(let i=0; i<12; i++){
-          const p=_slot();if(!p)continue;
-          p.on=true; p.life=0.4; p.ml=0.4;
-          p.m.position.copy(pos); p.m.visible=true; p.m.material.opacity=0.8; p.m.material.color.setHex(col);
-          const a = (i/12)*Math.PI*2;
-          p.vx=Math.cos(a)*15; p.vy=1; p.vz=Math.sin(a)*15;
-          p.m.scale.setScalar(1.5);
-      }
-  }
-  function explode(pos){
-    spawnSpark(pos, 0xff4400, 15);
-    spawnSpark(pos, 0xffaa00, 10);
-    spawnRing(pos, 0xffaa00);
-  }
-  
-  function update(dt){
-    for(const p of pool){
-      if(!p.on)continue;p.life-=dt;
-      if(p.life<=0){p.on=false;p.m.visible=false;continue;}
-      p.m.position.x+=p.vx*dt;p.m.position.y+=p.vy*dt;p.m.position.z+=p.vz*dt;
-      p.vy-=15*dt; 
-      const f=p.life/p.ml;
-      p.m.material.opacity=f; p.m.scale.multiplyScalar(0.92);
-    }
-  }
-  return {init, spawnSpark, spawnFlame, spawnRing, explode, update};
+  function spawnSpark(pos,col,count=2){for(let i=0;i<count;i++){const p=_slot();if(!p)break;p.on=true;p.life=.3+Math.random()*.2;p.ml=p.life;p.m.position.copy(pos);p.m.visible=true;p.m.material.opacity=1;p.m.material.color.setHex(col);p.vx=rnd(-6,6);p.vy=rnd(2,8);p.vz=rnd(-6,6);p.m.scale.setScalar(rnd(.5,1.2));}}
+  function spawnFlame(pos,sc=1){const p=_slot();if(!p)return;p.on=true;p.life=.2;p.ml=.2;p.m.position.copy(pos);p.m.visible=true;p.m.material.opacity=.8;p.m.material.color.setHex(Math.random()>.5?0xffaa00:0xff3300);p.vx=rnd(-2,2);p.vy=rnd(1,3);p.vz=rnd(-2,2);p.m.scale.setScalar(sc*2);}
+  function spawnRing(pos,col){for(let i=0;i<12;i++){const p=_slot();if(!p)continue;p.on=true;p.life=.4;p.ml=.4;p.m.position.copy(pos);p.m.visible=true;p.m.material.opacity=.8;p.m.material.color.setHex(col);const a=(i/12)*Math.PI*2;p.vx=Math.cos(a)*15;p.vy=1;p.vz=Math.sin(a)*15;p.m.scale.setScalar(1.5);}}
+  function explode(pos){spawnSpark(pos,0xff4400,15);spawnSpark(pos,0xffaa00,10);spawnRing(pos,0xffaa00);}
+  function update(dt){for(const p of pool){if(!p.on)continue;p.life-=dt;if(p.life<=0){p.on=false;p.m.visible=false;continue;}p.m.position.x+=p.vx*dt;p.m.position.y+=p.vy*dt;p.m.position.z+=p.vz*dt;p.vy-=15*dt;p.m.material.opacity=p.life/p.ml;p.m.scale.multiplyScalar(.92);}}
+  return{init,spawnSpark,spawnFlame,spawnRing,explode,update};
 })();
 
 // ══════════════════════════════════════════════════════════════
-//  SMOOTH CHASE CAMERA (FIXED AND STATIC)
+//  CAMERA
 // ══════════════════════════════════════════════════════════════
 const Cam=(()=>{
-  let cam;
-  let shakeAmt=0;
-  let camH=0; 
-  
-  function init(c,pos,h){
-    cam=c; 
-    cam.fov=70; 
-    cam.updateProjectionMatrix();
-    camH = h;
-    
-    const camDistance = 14;
-    const camHeight = 6;
-    const fx = Math.sin(h);
-    const fz = Math.cos(h);
-    
-    cam.position.x = pos.x - fx * camDistance;
-    cam.position.z = pos.z - fz * camDistance;
-    cam.position.y = pos.y + camHeight;
-    cam.up.set(0, 1, 0);
-    cam.lookAt(pos.x, pos.y + 1, pos.z);
-  }
-  
+  let cam,shakeAmt=0,camH=0;
+  function init(c,pos,h){cam=c;cam.fov=70;cam.updateProjectionMatrix();camH=h;const fx=Math.sin(h),fz=Math.cos(h);cam.position.x=pos.x-fx*14;cam.position.z=pos.z-fz*14;cam.position.y=pos.y+6;cam.up.set(0,1,0);cam.lookAt(pos.x,pos.y+1,pos.z);}
   function shake(amount){shakeAmt=amount;}
-  
   function update(c,body,dt){
-    cam=c;
-    const player = body;
-    
-    // Adjust FOV based on speed dynamically
-    const sr = clamp(Math.abs(player.spd)/PH.MAX, 0, 1);
-    cam.fov = lerp(cam.fov, 70 + sr*15, dt*5);
-    cam.updateProjectionMatrix();
-    
-    // Smoothly drag camera heading
-    let hDiff = adiff(player.h, camH);
-    camH += hDiff * Math.min(1, dt * 6.0); 
-
-    const camDistance = 14;
-    const camHeight = 6.5;
-
-    // Direction of CAMERA (not kart, so it glides smoothly behind)
-    const fx = Math.sin(camH);
-    const fz = Math.cos(camH);
-
-    let targetX = player.p.x - fx * camDistance;
-    let targetZ = player.p.z - fz * camDistance;
-    let targetY = player.p.y + camHeight;
-    
-    if(shakeAmt>0){
-      shakeAmt-=dt*4;
-      targetX+=(Math.random() - 0.5) * shakeAmt * 2;
-      targetY+=(Math.random() - 0.5) * shakeAmt * 2;
-      targetZ+=(Math.random() - 0.5) * shakeAmt * 2;
-      shakeAmt=Math.max(0,shakeAmt);
-    }
-
-    // Time-independent lerping for smooth tracking
-    const lerpFactor = 1 - Math.exp(-dt * 10);
-    cam.position.x += (targetX - cam.position.x) * lerpFactor;
-    cam.position.y += (targetY - cam.position.y) * lerpFactor;
-    cam.position.z += (targetZ - cam.position.z) * lerpFactor;
-
-    cam.up.set(0, 1, 0); // Strict Upright Enforcement
-    cam.lookAt(player.p.x + Math.sin(player.h)*10, player.p.y + 1, player.p.z + Math.cos(player.h)*10);
+    cam=c;const sr=clamp(Math.abs(body.spd)/PH.MAX,0,1);
+    cam.fov=lerp(cam.fov,70+sr*15,dt*5);cam.updateProjectionMatrix();
+    camH+=adiff(body.h,camH)*Math.min(1,dt*6);
+    const fx=Math.sin(camH),fz=Math.cos(camH);
+    let tx=body.p.x-fx*14,tz=body.p.z-fz*14,ty=body.p.y+6.5;
+    if(shakeAmt>0){shakeAmt-=dt*4;tx+=(Math.random()-.5)*shakeAmt*2;ty+=(Math.random()-.5)*shakeAmt*2;tz+=(Math.random()-.5)*shakeAmt*2;shakeAmt=Math.max(0,shakeAmt);}
+    const lf=1-Math.exp(-dt*10);cam.position.x+=(tx-cam.position.x)*lf;cam.position.y+=(ty-cam.position.y)*lf;cam.position.z+=(tz-cam.position.z)*lf;
+    cam.up.set(0,1,0);cam.lookAt(body.p.x+Math.sin(body.h)*10,body.p.y+1,body.p.z+Math.cos(body.h)*10);
   }
-  return {init,update,shake};
+  return{init,update,shake};
 })();
 
 // ══════════════════════════════════════════════════════════════
 //  MINIMAP
 // ══════════════════════════════════════════════════════════════
 const MMap=(()=>{
-  let ctx,W=150,H=150,sp,rc;
-  let mnX,mxX,mnZ,mxZ,sx,sz;
+  let ctx,W=150,H=150,sp,rc,mnX,mxX,mnZ,mxZ,sx,sz;
   function init(racers){
     rc=racers;sp=Track.getWaypts();mnX=mnZ=Infinity;mxX=mxZ=-Infinity;
     for(const p of sp){if(p.x<mnX)mnX=p.x;if(p.x>mxX)mxX=p.x;if(p.z<mnZ)mnZ=p.z;if(p.z>mxZ)mxZ=p.z;}
@@ -1440,197 +981,181 @@ const MMap=(()=>{
     const cv=gel('minimap');cv.width=W;cv.height=H;ctx=cv.getContext('2d');
   }
   function px(x,z){return{x:(x-mnX+20)*sx,y:(z-mnZ+20)*sz};}
-  function draw(){
+  function draw(extraRacers=[]){
     if(!ctx)return;ctx.clearRect(0,0,W,H);
     ctx.beginPath();for(let i=0;i<sp.length;i++){const{x,y}=px(sp[i].x,sp[i].z);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
-    ctx.closePath();ctx.strokeStyle='rgba(255,255,255,0.6)';ctx.lineWidth=8;ctx.stroke();
-    ctx.strokeStyle='rgba(0,0,0,0.8)';ctx.lineWidth=4;ctx.stroke();
-    
-    const COLS=['#ff3333','#3388ff','#33ff44','#ff33ff', '#ff8800', '#00ffff', '#ffffff', '#888888'];
-    for(const r of rc){
-        const{x,y}=px(r.body.p.x,r.body.p.z);
-        ctx.beginPath();ctx.arc(x,y,r.isPlayer?6:4,0,Math.PI*2);
-        ctx.fillStyle=COLS[r.idx%COLS.length];ctx.fill();
-        ctx.strokeStyle='#fff'; ctx.lineWidth=1.5; ctx.stroke();
-    }
+    ctx.closePath();ctx.strokeStyle='rgba(255,255,255,0.6)';ctx.lineWidth=8;ctx.stroke();ctx.strokeStyle='rgba(0,0,0,0.8)';ctx.lineWidth=4;ctx.stroke();
+    const COLS=['#ff3333','#3388ff','#33ff44','#ff33ff','#ff8800','#00dddd','#ffdd00','#aa00ff'];
+    for(const r of rc){const{x,y}=px(r.body.p.x,r.body.p.z);ctx.beginPath();ctx.arc(x,y,r.isPlayer?6:4,0,Math.PI*2);ctx.fillStyle=COLS[r.idx%COLS.length];ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();}
+    // FIX: Draw remote players on minimap too
+    for(const r of extraRacers){const{x,y}=px(r.body.p.x,r.body.p.z);ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle=COLS[r.idx%COLS.length];ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();}
   }
-  return {init,draw};
+  return{init,draw};
 })();
 
 // ══════════════════════════════════════════════════════════════
-//  UI CONTROLLER
+//  UI
 // ══════════════════════════════════════════════════════════════
 const UI=(()=>{
   const ARC=189;let _mt=null,_lt=null;
   function load(pct,txt){const b=gel('loadBar');if(b)b.style.width=pct+'%';const t=gel('loadTxt');if(t&&txt)t.textContent=txt;}
   function hideLoad(){const el=gel('sLoad');if(!el)return;el.style.opacity=0;setTimeout(()=>el.classList.add('hidden'),420);}
-  
-  function showMenu(){gel('sMenu').classList.remove('hidden'); setTimeout(()=>gel('sMenu').style.opacity=1,10);}
-  function hideMenu(){gel('sMenu').style.opacity=0; setTimeout(()=>gel('sMenu').classList.add('hidden'),400);}
-  
-  function showMapSelect() { gel('sMap').classList.remove('hidden'); }
-  function hideMapSelect() { gel('sMap').classList.add('hidden'); }
+  function showMenu(){const el=gel('sMenu');el.classList.remove('hidden');setTimeout(()=>el.style.opacity=1,10);}
+  function hideMenu(){const el=gel('sMenu');el.style.opacity=0;setTimeout(()=>el.classList.add('hidden'),400);}
+  function showMapSelect(){gel('sMap').classList.remove('hidden');setTimeout(()=>gel('sMap').style.opacity=1,10);}
+  function hideMapSelect(){gel('sMap').style.opacity=0;setTimeout(()=>gel('sMap').classList.add('hidden'),400);}
 
-  function showMPLobby(code, host) { 
-      gel('sMultiplayer').classList.remove('hidden');
+  // FIX: Completely reworked MP lobby UI functions
+  function showMPLobby(){
+      const el=gel('sMultiplayer');el.classList.remove('hidden');setTimeout(()=>el.style.opacity=1,10);
+      gel('mpLobbySetup').classList.remove('hidden');
+      gel('mpLobbyRoom').classList.add('hidden');
+  }
+  function hideMPLobby(){
+      const el=gel('sMultiplayer');el.style.opacity=0;setTimeout(()=>el.classList.add('hidden'),400);
+  }
+  function showMPLobbyRoom(code, isHost, playerCount, playerIds) {
       gel('mpLobbySetup').classList.add('hidden');
       gel('mpLobbyRoom').classList.remove('hidden');
       gel('lobbyCodeDisplay').textContent = code;
-      if(host) {
-          gel('lobbyStatus').textContent = "You are the Host! Waiting for players...";
+      updateLobbyPlayers(playerCount, playerIds);
+      if (isHost) {
           gel('btnHostSelectTrack').classList.remove('hidden');
+          gel('waitingForHostMsg').style.display = 'none';
+          gel('lobbyStatus').textContent = `You are the HOST — ${playerCount} player(s) in room`;
       } else {
-          gel('lobbyStatus').textContent = "Waiting for host to start...";
           gel('btnHostSelectTrack').classList.add('hidden');
+          gel('waitingForHostMsg').style.display = 'block';
+          gel('lobbyStatus').textContent = `${playerCount} player(s) in room`;
       }
   }
-  
+  function updateLobbyPlayers(count, playerIds) {
+      const statusEl = gel('lobbyStatus');
+      if (statusEl) {
+          if (mpIsHost) statusEl.textContent = `You are the HOST — ${count} player(s) in room`;
+          else statusEl.textContent = `${count} player(s) in room`;
+      }
+      // Show player slots
+      const listEl = gel('playerListUI');
+      if (listEl) {
+          listEl.innerHTML = '';
+          const ids = playerIds || [];
+          for (let i = 0; i < Math.max(count, ids.length); i++) {
+              const chip = document.createElement('div');
+              chip.style.cssText = 'padding:6px 14px; border-radius:20px; font-size:0.8rem; font-weight:bold; background:rgba(255,255,255,0.2); border:2px solid rgba(255,255,255,0.5); color:#fff;';
+              const id = ids[i] || '?';
+              const isMe = mpSocket && id === mpSocket.id;
+              chip.textContent = `P${i+1}${isMe ? ' (YOU)' : ''}`;
+              if (isMe) chip.style.borderColor = 'var(--s)';
+              listEl.appendChild(chip);
+          }
+      }
+  }
+
+  // FIX: mpError was missing entirely
+  function mpError(msg) {
+      const badge = gel('mpStatusBadge');
+      if (badge) { badge.textContent = '⚠ ' + msg; badge.className = 'error'; }
+      // Flash temporary error below buttons
+      let err = document.getElementById('mpErrorMsg');
+      if (!err) {
+          err = document.createElement('p');
+          err.id = 'mpErrorMsg';
+          err.style.cssText = 'color:#ff8888; font-size:0.9rem; margin-top:0.8rem; font-weight:bold;';
+          const setup = gel('mpLobbySetup');
+          if (setup) setup.appendChild(err);
+      }
+      err.textContent = msg;
+      setTimeout(() => { if (err) err.textContent = ''; }, 4000);
+  }
+
   function countdown(cb){
     const ov=gel('sCnt'),num=gel('cntNum');if(!ov||!num){cb();return;}
     ov.classList.remove('hidden');const steps=['3','2','1','GO!'];let i=0;
-    function go(){
-        num.textContent=steps[i];num.style.animation='none';num.offsetHeight;num.style.animation='';
-        AudioSys.playItem(); 
-        i++;
-        i<steps.length?setTimeout(go,900):setTimeout(()=>{ov.classList.add('hidden');cb();},800);
-    }
+    function go(){num.textContent=steps[i];num.style.animation='none';num.offsetHeight;num.style.animation='';AudioSys.playItem();i++;i<steps.length?setTimeout(go,900):setTimeout(()=>{ov.classList.add('hidden');cb();},800);}
     go();
   }
   
   function tick(st){
-    const spd=clamp(st.spd||0,0,320);
-    const sv=gel('spdVal'),arc=gel('spdArc');
+    const spd=clamp(st.spd||0,0,320),sv=gel('spdVal'),arc=gel('spdArc');
     if(sv)sv.textContent=spd;
-    if(arc){
-        arc.style.strokeDashoffset=(ARC-(spd/320)*ARC).toFixed(1);
-        const r=Math.round(255),g=Math.round(255-(spd/320)*200);
-        arc.style.stroke=`rgb(${r},${g},0)`;
-    }
+    if(arc){arc.style.strokeDashoffset=(ARC-(spd/320)*ARC).toFixed(1);arc.style.stroke=`rgb(255,${Math.round(255-(spd/320)*200)},0)`;}
     const lc=gel('hudLN'),lt=gel('hudLT');if(lc)lc.textContent=Math.min(st.lap,st.tot);if(lt)lt.textContent=st.tot;
     const pn=gel('hudPN'),ps=gel('hudPS');
     if(pn){pn.textContent=st.pos;pn.style.color=['#fbd000','#cccccc','#cd7f32','#fff'][Math.min(st.pos-1,3)];}
     if(ps)ps.textContent=['ST','ND','RD','TH'][Math.min(st.pos-1,3)]||'TH';
     const rt=gel('hudTM');if(rt)rt.textContent=fmt(st.time||0);
-    
     const sr=gel('shieldRing');if(sr)sr.classList.toggle('on',!!st.shield);
   }
   
   function setItem(t){
     const ib=gel('itmBox'),ii=gel('itmIcon'),il=gel('itmLbl');if(!ib)return;
-    ib.className=''; ii.style.transform='scale(0.5) translateY(20px)'; ii.style.opacity=0;
+    ib.className='';ii.style.transform='scale(0.5) translateY(20px)';ii.style.opacity=0;
     setTimeout(()=>{
-        const M={boost:{e:'⚡',l:'BOOST',c:'iboost'},missile:{e:'🚀',l:'MISSILE',c:'imissile'},shield:{e:'🛡',l:'SHIELD',c:'ishield'}};
-        if(t&&M[t]){if(ii)ii.textContent=M[t].e;if(il)il.textContent=M[t].l;ib.className=M[t].c;} 
-        else {if(ii)ii.textContent='?';if(il)il.textContent='NO ITEM';}
-        ii.style.transform='scale(1) translateY(0)'; ii.style.opacity=1;
-    }, 150);
+      const M={boost:{e:'⚡',l:'BOOST',c:'iboost'},missile:{e:'🚀',l:'MISSILE',c:'imissile'},shield:{e:'🛡',l:'SHIELD',c:'ishield'}};
+      if(t&&M[t]){if(ii)ii.textContent=M[t].e;if(il)il.textContent=M[t].l;ib.className=M[t].c;}
+      else{if(ii)ii.textContent='?';if(il)il.textContent='NO ITEM';}
+      ii.style.transform='scale(1) translateY(0)';ii.style.opacity=1;
+    },150);
+  }
+
+  function updateMPHud(count) {
+      const el = gel('hudMP');
+      if (el) { el.style.display = isMultiplayer ? 'block' : 'none'; gel('hudMPCount').textContent = count; }
   }
   
-  function flash(txt,col,dur=2000){
-    const el=gel('hudMsg');if(!el)return;clearTimeout(_mt);
-    el.textContent=txt;el.style.color='#'+(col||0xffffff).toString(16).padStart(6,'0');el.classList.add('show');
-    _mt=setTimeout(()=>el.classList.remove('show'),dur);
-  }
-  function lapBanner(lap,tot){
-    const el=gel('lapBan');if(!el)return;clearTimeout(_lt);
-    el.textContent=lap>tot?'FINAL LAP!':'LAP '+lap;el.classList.remove('hidden');el.classList.add('show');
-    _lt=setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.classList.add('hidden'),400);},2500);
-  }
-  function showEnd(pos,time){
-    gel('sEnd').classList.remove('hidden'); setTimeout(()=>gel('sEnd').style.opacity=1,10);
-    const M=['CHAMPION!','GREAT RACE!','WELL DONE!','KEEP TRYING!'],O=['1ST','2ND','3RD','4TH','5TH','6TH','7TH','8TH'],i=Math.min(pos-1,7);
-    gel('endTitle').textContent=M[Math.min(i, 3)]; gel('endPos').textContent=O[i]+' PLACE'; gel('endTime').textContent='TIME: '+fmt(time);
-  }
+  function flash(txt,col,dur=2000){const el=gel('hudMsg');if(!el)return;clearTimeout(_mt);el.textContent=txt;el.style.color='#'+(col||0xffffff).toString(16).padStart(6,'0');el.classList.add('show');_mt=setTimeout(()=>el.classList.remove('show'),dur);}
+  function lapBanner(lap,tot){const el=gel('lapBan');if(!el)return;clearTimeout(_lt);el.textContent=lap>tot?'FINAL LAP!':'LAP '+lap;el.classList.remove('hidden');el.classList.add('show');_lt=setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.classList.add('hidden'),400);},2500);}
+  function showEnd(pos,time){gel('sEnd').classList.remove('hidden');setTimeout(()=>gel('sEnd').style.opacity=1,10);const M=['CHAMPION!','GREAT RACE!','WELL DONE!','KEEP TRYING!'],O=['1ST','2ND','3RD','4TH','5TH','6TH','7TH','8TH'],i=Math.min(pos-1,7);gel('endTitle').textContent=M[Math.min(i,3)];gel('endPos').textContent=O[i]+' PLACE';gel('endTime').textContent='TIME: '+fmt(time);}
   function hitFlash(){const el=gel('hitFlash');if(!el)return;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),150);}
-  function speedLines(on){const el=gel('speedLines');if(el)on?el.classList.add('on'):el.classList.remove('on');}
-  function fmt(s){const m=Math.floor(s/60),ss=Math.floor(s%60),ms=Math.floor((s%1)*1000);return `${m}:${String(ss).padStart(2,'0')}.${String(ms).padStart(3,'0')}`;}
-  
-  return {load,hideLoad,showMenu,hideMenu,showMapSelect,hideMapSelect,showMPLobby,countdown,tick,setItem,flash,lapBanner,showEnd,hitFlash,speedLines,fmt};
+  function fmt(s){const m=Math.floor(s/60),ss=Math.floor(s%60),ms=Math.floor((s%1)*1000);return`${m}:${String(ss).padStart(2,'0')}.${String(ms).padStart(3,'0')}`;}
+  return{load,hideLoad,showMenu,hideMenu,showMapSelect,hideMapSelect,showMPLobby,hideMPLobby,showMPLobbyRoom,updateLobbyPlayers,mpError,countdown,tick,setItem,updateMPHud,flash,lapBanner,showEnd,hitFlash,fmt};
 })();
 
 // ══════════════════════════════════════════════════════════════
-//  ENVIRONMENT (Sky & Clouds)
+//  ENVIRONMENT
 // ══════════════════════════════════════════════════════════════
-function buildSky(scene) {
-    const skyCv = document.createElement('canvas'); skyCv.width=2; skyCv.height=256;
-    const skyCtx = skyCv.getContext('2d');
-    const grad = skyCtx.createLinearGradient(0,0,0,256);
-    grad.addColorStop(0, '#1e82dc'); 
-    grad.addColorStop(0.5, '#5cb8ff'); 
-    grad.addColorStop(1, '#a6d8ff'); 
-    skyCtx.fillStyle=grad; skyCtx.fillRect(0,0,2,256);
-    const skyTex = new THREE.CanvasTexture(skyCv);
-    
-    const skyMat = new THREE.MeshBasicMaterial({map: skyTex, side: THREE.BackSide, depthWrite: false, fog: false});
-    const skySphere = new THREE.Mesh(new THREE.SphereGeometry(1500, 32, 16), skyMat);
-    skySphere.renderOrder = -1;
-    scene.add(skySphere);
-
-    const clouds = [];
-    const cloudMat = new THREE.MeshLambertMaterial({color:0xffffff, transparent:true, opacity:0.9});
-    for(let i=0; i<30; i++) {
-        const grp = new THREE.Group();
-        const sc = 2 + Math.random()*5;
-        for(let p=0; p<5; p++) {
-            const puff = new THREE.Mesh(new THREE.SphereGeometry(10*sc, 12, 12), cloudMat);
-            puff.position.set(rnd(-10,10)*sc, rnd(-3,5)*sc, rnd(-10,10)*sc);
-            grp.add(puff);
-        }
-        grp.position.set(rnd(-800,800), rnd(150, 350), rnd(-800,800));
-        scene.add(grp);
-        clouds.push({grp, spd: rnd(0.1, 0.4)});
-    }
-    return clouds;
+function buildSky(scene){
+  const skyCv=document.createElement('canvas');skyCv.width=2;skyCv.height=256;const skyCtx=skyCv.getContext('2d');const grad=skyCtx.createLinearGradient(0,0,0,256);grad.addColorStop(0,'#1e82dc');grad.addColorStop(.5,'#5cb8ff');grad.addColorStop(1,'#a6d8ff');skyCtx.fillStyle=grad;skyCtx.fillRect(0,0,2,256);
+  const skyTex=new THREE.CanvasTexture(skyCv);const skyMat=new THREE.MeshBasicMaterial({map:skyTex,side:THREE.BackSide,depthWrite:false,fog:false});const skySphere=new THREE.Mesh(new THREE.SphereGeometry(1500,32,16),skyMat);skySphere.renderOrder=-1;scene.add(skySphere);
+  const clouds=[];const cloudMat=new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:.9});
+  for(let i=0;i<30;i++){const grp=new THREE.Group();const sc=2+Math.random()*5;for(let p=0;p<5;p++){const puff=new THREE.Mesh(new THREE.SphereGeometry(10*sc,12,12),cloudMat);puff.position.set(rnd(-10,10)*sc,rnd(-3,5)*sc,rnd(-10,10)*sc);grp.add(puff);}grp.position.set(rnd(-800,800),rnd(150,350),rnd(-800,800));scene.add(grp);clouds.push({grp,spd:rnd(.1,.4)});}
+  return clouds;
 }
 
 // ══════════════════════════════════════════════════════════════
 //  RENDERER & MAIN LOOP
 // ══════════════════════════════════════════════════════════════
-let renderer,scene,camera, clouds=[];
+let renderer,scene,camera,clouds=[];
 window._raceDone=false;
 let gState='LOAD',racers=[],player=null,aiList=[];
-let items=null, activeMissiles=[];
+let items=null,activeMissiles=[];
 let raceT0=0,raceTime=0,lastTS=0,hudF=0,idleAngle=0;
+// FIX: Sync rate limiter — don't flood server (send ~20 times/sec)
+let _syncAccum = 0;
+const SYNC_INTERVAL = 1/20;
+// ADDED
+let lastSync = 0;
 
 function initRenderer(){
-  scene=new THREE.Scene();
-  scene.background = new THREE.Color(0x5cb8ff);
-  scene.fog=new THREE.FogExp2(0xa6d8ff,.0015);
-
+  scene=new THREE.Scene();scene.background=new THREE.Color(0x5cb8ff);scene.fog=new THREE.FogExp2(0xa6d8ff,.0015);
   camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,.5,2000);
   renderer=new THREE.WebGLRenderer({canvas:gel('c'),antialias:true,powerPreference:'high-performance'});
-  renderer.setSize(innerWidth,innerHeight);
-  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
-  renderer.shadowMap.enabled=true;
-  renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-
-  // Sunny Lighting
-  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-  const sun=new THREE.DirectionalLight(0xffffee, 1.0);
-  sun.position.set(150, 250, 100); sun.castShadow=true;
-  sun.shadow.camera.left=sun.shadow.camera.bottom=-400;
-  sun.shadow.camera.right=sun.shadow.camera.top=400;
-  sun.shadow.camera.near=10; sun.shadow.camera.far=800;
-  sun.shadow.mapSize.set(2048,2048); sun.shadow.bias=-.0005;
-  scene.add(sun);
-  
-  clouds = buildSky(scene);
-
-  window.addEventListener('resize',()=>{
-    camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
-    renderer.setSize(innerWidth,innerHeight);
-  });
+  renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+  scene.add(new THREE.AmbientLight(0xffffff,.5));
+  const sun=new THREE.DirectionalLight(0xffffee,1.0);sun.position.set(150,250,100);sun.castShadow=true;
+  sun.shadow.camera.left=sun.shadow.camera.bottom=-400;sun.shadow.camera.right=sun.shadow.camera.top=400;
+  sun.shadow.camera.near=10;sun.shadow.camera.far=800;sun.shadow.mapSize.set(2048,2048);sun.shadow.bias=-.0005;scene.add(sun);
+  clouds=buildSky(scene);
+  window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 }
 
 const Keys={};let _iUsed=false;
-window.addEventListener('keydown',e=>{ Keys[e.code]=true; if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault(); });
+window.addEventListener('keydown',e=>{Keys[e.code]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();});
 window.addEventListener('keyup',e=>{Keys[e.code]=false;if(e.code==='Space')_iUsed=false;});
 function readInput(){
-  const inp={
-    throttle:(Keys.KeyW||Keys.ArrowUp)?1:0, brake:(Keys.KeyS||Keys.ArrowDown)?1:0,
-    steerLeft:(Keys.KeyA||Keys.ArrowLeft)?1:0, steerRight:(Keys.KeyD||Keys.ArrowRight)?1:0,
-    useItem:false,
-  };
+  const inp={throttle:(Keys.KeyW||Keys.ArrowUp)?1:0,brake:(Keys.KeyS||Keys.ArrowDown)?1:0,steerLeft:(Keys.KeyA||Keys.ArrowLeft)?1:0,steerRight:(Keys.KeyD||Keys.ArrowRight)?1:0,useItem:false};
   if(Keys.Space&&!_iUsed){inp.useItem=true;_iUsed=true;}
   return inp;
 }
@@ -1639,36 +1164,35 @@ function buildGame(){
   Track.init();
   const td=Track.buildScene(scene);
   const starts=Track.startPositions(),cps=Track.getCpts();
-  
   racers=[];aiList=[];activeMissiles=[];
-  
-  if(!isMultiplayer) {
-      player=new Racer(0,true,starts[0],scene,cps,SETTINGS_LAPS);
-      racers.push(player);
-      
-      for(let i=0; i<SETTINGS_AI_COUNT; i++){
-        const ai=new Racer(i+1,false,starts[i+1],scene,cps,SETTINGS_LAPS);
-        racers.push(ai);
-        aiList.push(new AI(ai, SETTINGS_AI_SKILL));
-      }
+
+  // FIX: In MP, use mpMyIndex (set from server) as our kart color/position slot
+  const mySlot = isMultiplayer ? mpMyIndex : 0;
+  player=new Racer(mySlot, true, starts[mySlot % starts.length], scene, cps, SETTINGS_LAPS);
+
+  if(!isMultiplayer){
+    racers.push(player);
+    for(let i=0;i<SETTINGS_AI_COUNT;i++){
+      const ai=new Racer(i+1,false,starts[i+1],scene,cps,SETTINGS_LAPS);
+      racers.push(ai);aiList.push(new AI(ai,SETTINGS_AI_SKILL));
+    }
   } else {
-      // Multiplayer spawn - AI is explicitly disabled
-      player = new Racer(mpMyIndex, true, starts[mpMyIndex % starts.length], scene, cps, SETTINGS_LAPS);
-      racers.push(player);
+    // FIX: In MP mode only push the local player; remotes are added dynamically via sync
+    racers=[player];
   }
-  
+
   items=new ItemBoxes(td.itemPos,scene);
-  
   Parts.init(scene);
   UI.setItem(null);
   Cam.init(camera,player.body.p,player.body.h);
   MMap.init(racers);
+  if(isMultiplayer) UI.updateMPHud(1);
 }
 
 function teardown(){
   for(const r of racers)r.destroy();
-  for(let id in remoteRacers) remoteRacers[id].destroy(scene);
-  remoteRacers = {};
+  for(let id in remoteRacers){remoteRacers[id].destroy(scene);}
+  remoteRacers={};
   if(items){items.destroy();items=null;}
   while(scene.children.length)scene.remove(scene.children[0]);
   initRenderer();
@@ -1677,185 +1201,170 @@ function teardown(){
 function boot(){
   UI.load(10,'Renderer Setup...');
   initRenderer();
-  
-  // Setup Dynamic Map Previews
-  const mapGrid = gel('mapGrid');
-  mapGrid.innerHTML = '';
-  MAPS.forEach((map, i) => {
-      let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
-      map.forEach(p => {
-          if (p.x < minX) minX = p.x; if (p.x > maxX) maxX = p.x;
-          if (p.z < minZ) minZ = p.z; if (p.z > maxZ) maxZ = p.z;
-      });
-      const pad = 40;
-      const w = maxX - minX + pad * 2;
-      const h = maxZ - minZ + pad * 2;
-      let path = '';
-      map.forEach((p, idx) => { path += (idx === 0 ? 'M' : 'L') + (p.x - minX + pad) + ',' + (p.z - minZ + pad) + ' '; });
-      path += 'Z';
-      const btn = document.createElement('button');
-      btn.className = 'map-btn';
-      btn.setAttribute('data-map', i);
-      btn.innerHTML = `<svg class="map-icon" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet"><path d="${path}" fill="none" stroke="#fbd000" stroke-width="${Math.max(w,h)*0.08}" stroke-linejoin="round" stroke-linecap="round"/></svg><span>${MAP_NAMES[i]}</span>`;
-      mapGrid.appendChild(btn);
+  const mapGrid=gel('mapGrid');
+  mapGrid.innerHTML='';
+  MAPS.forEach((map,i)=>{
+    let minX=Infinity,maxX=-Infinity,minZ=Infinity,maxZ=-Infinity;
+    map.forEach(p=>{if(p.x<minX)minX=p.x;if(p.x>maxX)maxX=p.x;if(p.z<minZ)minZ=p.z;if(p.z>maxZ)maxZ=p.z;});
+    const pad=40,w=maxX-minX+pad*2,h=maxZ-minZ+pad*2;
+    let path='';map.forEach((p,idx)=>{path+=(idx===0?'M':'L')+(p.x-minX+pad)+','+(p.z-minZ+pad)+' ';});path+='Z';
+    const btn=document.createElement('button');btn.className='map-btn';btn.setAttribute('data-map',i);
+    btn.innerHTML=`<svg class="map-icon" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet"><path d="${path}" fill="none" stroke="#fbd000" stroke-width="${Math.max(w,h)*.08}" stroke-linejoin="round" stroke-linecap="round"/></svg><span>${MAP_NAMES[i]}</span>`;
+    mapGrid.appendChild(btn);
   });
-
-  UI.load(40,'Generating Mushroom World...');
+  UI.load(40,'Generating Track...');
   Track.init();
   UI.load(70,'Spawning Racers...');
   buildGame();
   UI.load(100,'Ready to Race!');
-  
   setTimeout(()=>{
     UI.hideLoad();UI.showMenu();gState='MENU';
-    
-    // --- MAIN MENU LOGIC ---
-    gel('btnSinglePlayerMode').onclick = () => {
-        gel('mainModeSelect').classList.add('hidden');
-        gel('singlePlayerConfig').classList.remove('hidden');
-    };
-    
-    gel('btnBackToMode').onclick = () => {
-        gel('singlePlayerConfig').classList.add('hidden');
-        gel('mainModeSelect').classList.remove('hidden');
-    };
-    
-    // SINGLE PLAYER START -> Map Select
+
+    // ── Single player flow ─────────────────────────────────
+    gel('btnSinglePlayerMode').onclick=()=>{gel('mainModeSelect').classList.add('hidden');gel('singlePlayerConfig').classList.remove('hidden');};
+    gel('btnBackToMode').onclick=()=>{gel('singlePlayerConfig').classList.add('hidden');gel('mainModeSelect').classList.remove('hidden');};
     gel('btnStart').onclick=()=>{
-        isMultiplayer = false;
-        SETTINGS_LAPS = parseInt(gel('uiLaps').value);
-        SETTINGS_AI_COUNT = parseInt(gel('uiBotCount').value);
-        SETTINGS_AI_SKILL = parseFloat(gel('uiBotDiff').value);
-        UI.hideMenu();
-        UI.showMapSelect();
+      isMultiplayer=false;
+      SETTINGS_LAPS=parseInt(gel('uiLaps').value);
+      SETTINGS_AI_COUNT=parseInt(gel('uiBotCount').value);
+      SETTINGS_AI_SKILL=parseFloat(gel('uiBotDiff').value);
+      UI.hideMenu();UI.showMapSelect();
     };
 
-    // MULTIPLAYER MODE START
-    gel('btnMultiPlayerMode').onclick = () => {
-        UI.hideMenu();
-        gel('sMultiplayer').classList.remove('hidden');
-        setTimeout(() => gel('sMultiplayer').style.opacity = 1, 10);
-    };
-    
-    gel('btnBackFromMP').onclick = () => {
-        gel('sMultiplayer').style.opacity = 0; 
-        setTimeout(() => gel('sMultiplayer').classList.add('hidden'), 400);
-        UI.showMenu();
+    // ── Multiplayer flow ───────────────────────────────────
+    gel('btnMultiPlayerMode').onclick=()=>{UI.hideMenu();UI.showMPLobby();};
+    gel('btnBackFromMP').onclick=()=>{UI.hideMPLobby();UI.showMenu();};
+
+    gel('btnCreateRoom').onclick=()=>{
+      gel('btnCreateRoom').disabled=true;
+      gel('btnCreateRoom').textContent='CONNECTING...';
+      MP.createRoom();
+      setTimeout(()=>{gel('btnCreateRoom').disabled=false;gel('btnCreateRoom').textContent='CREATE ROOM';},3000);
     };
 
-    gel('btnCreateRoom').onclick = () => MP.createRoom();
-    gel('btnJoinRoom').onclick = () => {
-        const code = gel('joinCode').value.trim();
-        if(code) MP.joinRoom(code);
+    gel('btnJoinRoom').onclick=()=>{
+      const code=gel('joinCode').value.trim().toUpperCase();
+      if(!code){UI.mpError("Enter a room code first.");return;}
+      gel('btnJoinRoom').disabled=true;gel('btnJoinRoom').textContent='...';
+      MP.joinRoom(code);
+      setTimeout(()=>{gel('btnJoinRoom').disabled=false;gel('btnJoinRoom').textContent='JOIN';},3000);
     };
-    
-    gel('btnHostSelectTrack').onclick = () => {
-        gel('sMultiplayer').classList.add('hidden');
-        UI.showMapSelect();
+
+    // FIX: Enter key in join code field
+    gel('joinCode').addEventListener('keydown', e => { if(e.key === 'Enter') gel('btnJoinRoom').click(); });
+
+    // FIX: Leave room properly disconnects socket
+    gel('btnLeaveRoom').onclick=()=>{
+      MP.leaveRoom();
+      gel('mpLobbyRoom').classList.add('hidden');
+      gel('mpLobbySetup').classList.remove('hidden');
+      const badge=gel('mpStatusBadge');if(badge){badge.textContent='● NOT CONNECTED';badge.className='';}
     };
-    
-    // Listen for Map Selection
-    document.querySelectorAll('.map-btn').forEach(btn => {
-        btn.onclick = (e) => {
-            SETTINGS_MAP = parseInt(e.currentTarget.getAttribute('data-map'));
-            
-            if (isMultiplayer && mpIsHost) {
-                // Host selected a map, tell server to start
-                MP.hostSelectsMapAndStarts(SETTINGS_MAP);
-            } else {
-                // Single Player immediate start
-                UI.hideMapSelect();
-                AudioSys.init(); 
-                teardown();
-                buildGame(); 
-                startRace();
-            }
-        };
+
+    // Host selects track → server broadcasts race_start to everyone
+    gel('btnHostSelectTrack').onclick=()=>{
+      gel('sMultiplayer').classList.add('hidden');
+      UI.showMapSelect();
+    };
+
+    // ── Map selection ──────────────────────────────────────
+    document.querySelectorAll('.map-btn').forEach(btn=>{
+      btn.onclick=(e)=>{
+        SETTINGS_MAP=parseInt(e.currentTarget.getAttribute('data-map'));
+        if(isMultiplayer && mpIsHost){
+          // Tell server → server sends race_start to all players
+          UI.hideMapSelect();
+          MP.hostSelectsMapAndStarts(SETTINGS_MAP);
+          // Show "waiting for race to begin" overlay briefly
+          UI.flash('🏎 Starting race for all players...', 0x43b047, 3000);
+          gel('sMultiplayer').classList.remove('hidden');
+          gel('mpLobbySetup').classList.add('hidden');
+          gel('mpLobbyRoom').classList.remove('hidden');
+        } else if(!isMultiplayer){
+          UI.hideMapSelect();
+          AudioSys.init();
+          teardown();buildGame();startRace();
+        }
+      };
     });
 
+    // ── Restart / back to menu ─────────────────────────────
     gel('btnRestart').onclick=()=>{
-        gel('sEnd').style.opacity=0; setTimeout(()=>gel('sEnd').classList.add('hidden'),400);
-        gel('hud').classList.add('hidden');
-        UI.showMenu();
-        gState='MENU';
+      if(isMultiplayer){MP.leaveRoom();}
+      isMultiplayer=false;
+      gel('sEnd').style.opacity=0;setTimeout(()=>gel('sEnd').classList.add('hidden'),400);
+      gel('hud').classList.add('hidden');
+      // Reset MP UI state
+      gel('mpLobbySetup').classList.remove('hidden');
+      gel('mpLobbyRoom').classList.add('hidden');
+      const badge=gel('mpStatusBadge');if(badge){badge.textContent='● NOT CONNECTED';badge.className='';}
+      UI.showMenu();gState='MENU';
     };
-    
+
     requestAnimationFrame(loop);
-  }, 600);
+  },600);
 }
 
 function startRace(){
-  window._raceDone=false;raceTime=0;
+  window._raceDone=false;raceTime=0;_syncAccum=0;
   UI.countdown(()=>{
-      gState='RACE'; raceT0=performance.now()*.001;
-      gel('hud').classList.remove('hidden');
-      UI.lapBanner(1,SETTINGS_LAPS);
+    gState='RACE';raceT0=performance.now()*.001;
+    gel('hud').classList.remove('hidden');
+    UI.lapBanner(1,SETTINGS_LAPS);
+    if(isMultiplayer) UI.updateMPHud(Object.keys(remoteRacers).length+1);
   });
 }
 
 function loop(ts){
   requestAnimationFrame(loop);
   const dt=Math.min((ts-lastTS)*.001,.06);lastTS=ts;
-
-  for(let c of clouds) c.grp.position.x -= c.spd * dt * 60;
+  for(const c of clouds)c.grp.position.x-=c.spd*dt*60;
 
   if(gState==='RACE'){
     raceTime=performance.now()*.001-raceT0;
-    
     const inp=readInput();
-    if(inp.useItem&&player.item){ player.fireItem(racers); inp.useItem=false; }
+    if(inp.useItem&&player.item){player.fireItem(racers);inp.useItem=false;}
+    player.update(inp,dt);
 
-    if (inp) player.update(inp,dt);
-    for(let i=0;i<aiList.length;i++) aiList[i].update(dt,racers);
-    for(let i=1;i<racers.length;i++) racers[i].update(null,dt);
-
-    if (isMultiplayer) {
-        for(let id in remoteRacers) remoteRacers[id].update(dt);
-        if(hudF % 4 === 0) MP.sendSync();
+    if(!isMultiplayer){
+      for(let i=0;i<aiList.length;i++)aiList[i].update(dt,racers);
+      for(let i=1;i<racers.length;i++)racers[i].update(null,dt);
     }
 
-    let collidableBodies = racers.map(r=>r.body);
-    if(isMultiplayer) {
-        for(let id in remoteRacers) collidableBodies.push(remoteRacers[id].body);
+    // FIX: Update & draw remote racers in MP
+    if(isMultiplayer){
+      for(const id in remoteRacers) remoteRacers[id].update(dt);
+      // Throttled sync
+      _syncAccum+=dt;
+      if(_syncAccum>=SYNC_INTERVAL){_syncAccum=0;MP.sendSync();}
     }
-    
+
+    let collidableBodies=racers.map(r=>r.body);
+    if(isMultiplayer)for(const id in remoteRacers)collidableBodies.push(remoteRacers[id].body);
     resolveCollisions(collidableBodies);
     for(const r of racers)resolveWall(r.body);
 
-    items.update(racers,dt); // Syncing items accurately requires server authority. This basic version lets all clients claim boxes.
+    items.update(racers,dt);
     Parts.update(dt);
-    
-    for(let i=activeMissiles.length-1;i>=0;i--){
-      const m=activeMissiles[i]; m.update(dt);
-      if(m.dead){ if(m._onHit)m._onHit(m.p); activeMissiles.splice(i,1); }
-    }
+    for(let i=activeMissiles.length-1;i>=0;i--){const m=activeMissiles[i];m.update(dt);if(m.dead){if(m._onHit)m._onHit(m.p);activeMissiles.splice(i,1);}}
 
-    // Progress array combining local and remote
-    let allRacers = [...racers];
-    if(isMultiplayer) {
-        for(let id in remoteRacers) allRacers.push(remoteRacers[id]);
-    }
-    
-    // Sort progress based purely on nearest track index.
-    // In a full server, the server calculates positions to prevent desync cheating.
-    const s=allRacers.sort((a,b)=>(b.progress?b.progress():0)-(a.progress?a.progress():0));
-    for(let i=0;i<s.length;i++) if(s[i].racePos !== undefined) s[i].racePos=i+1;
+    // Position sorting (only local racers for local HUD)
+    const sorted=[...racers].sort((a,b)=>(b.progress?b.progress():0)-(a.progress?a.progress():0));
+    for(let i=0;i<sorted.length;i++)sorted[i].racePos=i+1;
 
     Cam.update(camera,player.body,dt);
 
     if(++hudF%2===0){
-      UI.tick({spd:player.body.kmh,lap:player.lap,tot:SETTINGS_LAPS,pos:player.racePos,
-        time:raceTime,shield:player.body.shield});
-      MMap.draw();
+      UI.tick({spd:player.body.kmh,lap:player.lap,tot:SETTINGS_LAPS,pos:player.racePos,time:raceTime,shield:player.body.shield});
+      // FIX: Pass remote racers to minimap draw
+      MMap.draw(Object.values(remoteRacers));
     }
-    if(window._raceDone){ window._raceDone=false; gState='END'; setTimeout(()=>UI.showEnd(player.racePos,raceTime),1500); }
-    
+    if(window._raceDone){window._raceDone=false;gState='END';setTimeout(()=>UI.showEnd(player.racePos,raceTime),1500);}
   } else {
     idleAngle+=dt*.1;
-    camera.position.set(40+Math.cos(idleAngle)*180, 80, 30+Math.sin(idleAngle)*180);
+    camera.position.set(40+Math.cos(idleAngle)*180,80,30+Math.sin(idleAngle)*180);
     camera.lookAt(40,0,30);
   }
-
   renderer.render(scene,camera);
 }
 
