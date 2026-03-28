@@ -8,7 +8,7 @@
 <style>
   :root { --p: #e52521; --s: #fbd000; --b: #43b047; --t: #f0f0f0; --sky: #55bbff; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--sky); color: var(--t); font-family: 'Courier New', monospace; user-select: none; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: var(--sky); color: var(--t); font-family: 'Courier New', monospace; user-select: none; touch-action: none; }
   #c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; z-index: 1; }
   .hidden { display: none !important; opacity: 0; pointer-events: none; }
   
@@ -130,6 +130,21 @@
   #endTitle { font-family: 'Arial Black', Impact, sans-serif; font-size: 4rem; letter-spacing: 4px; color: white; text-shadow: 4px 4px 0 var(--p); margin-bottom: 1rem; transform: skew(-5deg); }
   #endPos { font-family: 'Arial Black', Impact, sans-serif; font-size: 5rem; color: var(--s); text-shadow: 6px 6px 0 #c97a00, 0 0 40px var(--s); margin-bottom: 0.5rem; line-height: 1; -webkit-text-stroke: 2px white; }
   #endTime { font-size: 1.5rem; color: white; letter-spacing: 3px; margin-bottom: 1.5rem; font-weight: bold; background: rgba(255,255,255,0.2); padding: 10px 30px; border-radius: 30px; display: inline-block; border: 2px solid white; }
+
+  /* TOUCH CONTROLS UI */
+  #touchUI { position: fixed; inset: 0; pointer-events: none; z-index: 55; display: flex; justify-content: space-between; align-items: flex-end; padding: 30px; padding-bottom: 50px; }
+  #joyZone { width: 140px; height: 140px; position: relative; pointer-events: auto; }
+  #joyBase { width: 140px; height: 140px; background: rgba(0,0,0,0.3); border: 3px solid rgba(255,255,255,0.5); border-radius: 50%; position: absolute; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; }
+  #joyStick { width: 60px; height: 60px; background: rgba(255,255,255,0.9); border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transform: translate(0px, 0px); transition: transform 0.05s linear; }
+  #btnZone { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 15px; pointer-events: auto; transform: translateY(10px); }
+  .t-btn { width: 70px; height: 70px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.8); color: white; font-family: 'Arial Black', sans-serif; font-size: 0.9rem; box-shadow: 0 6px 0 rgba(0,0,0,0.5); opacity: 0.85; transition: transform 0.1s, box-shadow 0.1s; display:flex; justify-content:center; align-items:center; user-select:none; touch-action:none; }
+  .t-btn:active { transform: translateY(6px); box-shadow: 0 0 0 rgba(0,0,0,0.4); opacity: 1; }
+  #btnItem { grid-column: 1 / span 2; justify-self: center; margin-bottom: 0px; width: 60px; height: 60px; font-size:0.8rem; }
+  
+  @media (min-width: 901px) {
+      /* Hide touch controls on large screens unless it's a touch device */
+      @media (pointer: fine) { #touchUI { display: none !important; } }
+  }
 </style>
 </head>
 <body>
@@ -275,6 +290,18 @@
 
 <div id="sCnt" class="hidden"><div id="cntNum">3</div></div>
 
+<!-- Mobile Touch UI -->
+<div id="touchUI" class="hidden">
+  <div id="joyZone">
+    <div id="joyBase"><div id="joyStick"></div></div>
+  </div>
+  <div id="btnZone">
+    <button id="btnItem" class="t-btn" style="background:rgba(60,170,255,0.8); border-color:#fff;">ITEM</button>
+    <button id="btnBrake" class="t-btn" style="background:rgba(229,37,33,0.8); border-color:#fff;">BRK</button>
+    <button id="btnGas" class="t-btn" style="background:rgba(67,176,71,0.8); border-color:#fff;">GAS</button>
+  </div>
+</div>
+
 <div id="hud" class="hidden">
   <div id="hudBtnPause" title="Pause Game (Esc)">⏸</div>
   <div id="hudTop">
@@ -357,6 +384,57 @@ function clamp(v,a,b){return v<a?a:v>b?b:v}
 function adiff(a,b){let d=a-b;while(d>Math.PI)d-=Math.PI*2;while(d<-Math.PI)d+=Math.PI*2;return d}
 function cr(p0,p1,p2,p3,t){const t2=t*t,t3=t2*t;return .5*((2*p1)+(-p0+p2)*t+(2*p0-5*p1+4*p2-p3)*t2+(-p0+3*p1-3*p2+p3)*t3)}
 function gel(id){return document.getElementById(id)}
+
+// ── Touch Inputs ──────────────────────────────────────────────
+const TouchInput = { gas: false, brake: false, item: false, steer: 0 };
+function setupTouch() {
+    const joyBase = gel('joyBase');
+    const joyStick = gel('joyStick');
+    let joyActive = false;
+    let joyCenterX = 0;
+
+    joyBase.addEventListener('touchstart', e => {
+        e.preventDefault();
+        joyActive = true;
+        const rect = joyBase.getBoundingClientRect();
+        joyCenterX = rect.left + rect.width / 2;
+        updateJoy(e.touches[0]);
+    }, {passive: false});
+
+    joyBase.addEventListener('touchmove', e => {
+        e.preventDefault();
+        if(!joyActive) return;
+        updateJoy(e.touches[0]);
+    }, {passive: false});
+
+    const endJoy = (e) => {
+        e.preventDefault();
+        joyActive = false;
+        TouchInput.steer = 0;
+        joyStick.style.transform = `translate(0px, 0px)`;
+    };
+    joyBase.addEventListener('touchend', endJoy);
+    joyBase.addEventListener('touchcancel', endJoy);
+
+    function updateJoy(t) {
+        let dx = t.clientX - joyCenterX;
+        let maxDist = 40; 
+        TouchInput.steer = clamp(dx / maxDist, -1, 1);
+        joyStick.style.transform = `translate(${TouchInput.steer * maxDist}px, 0px)`;
+    }
+
+    const bindBtn = (id, key) => {
+        const el = gel(id);
+        el.addEventListener('touchstart', e => { e.preventDefault(); TouchInput[key] = true; el.style.transform='translateY(6px)'; el.style.boxShadow='0 0 0 #000'; });
+        const endBtn = e => { e.preventDefault(); TouchInput[key] = false; el.style.transform=''; el.style.boxShadow=''; };
+        el.addEventListener('touchend', endBtn);
+        el.addEventListener('touchcancel', endBtn);
+    };
+
+    bindBtn('btnGas', 'gas');
+    bindBtn('btnBrake', 'brake');
+    bindBtn('btnItem', 'item');
+}
 
 // ══════════════════════════════════════════════════════════════
 //  MULTIPLAYER MANAGER
@@ -882,26 +960,22 @@ class Body{
         if(this.btimer>0){this.boost=true;this.btimer-=dt;} else { this.boost=false; }
     }
     
-    this.vy -= 80 * dt; // Gravity
+    this.vy -= 120 * dt; // Stronger Gravity
     let nextY = this.p.y + this.vy * dt;
     
+    // Aggressively stick to the ground if traveling downhill
     if (nextY <= groundY + 0.1) {
         if (this.vy < -15 && !this.isRemote && !this.isGrounded) Parts.spawnSpark(this.p, 0xaaaaaa, 10);
-        // Smoothly approach ground to completely absorb shaking!
-        this.p.y = lerp(this.p.y, groundY, 1 - Math.exp(-dt * 20));
-        if (this.p.y < groundY) this.p.y = groundY; // hard floor safety
+        this.p.y = groundY;
+        this.vy = 0;
+        this.isGrounded = true;
+    } else if (this.isGrounded && nextY < groundY + 4.5 && this.vy <= 0) {
+        this.p.y = groundY;
         this.vy = 0;
         this.isGrounded = true;
     } else {
-        if (this.isGrounded && nextY < groundY + 2.5 && this.vy <= 0) {
-            this.p.y = lerp(this.p.y, groundY, 1 - Math.exp(-dt * 20));
-            if (this.p.y < groundY) this.p.y = groundY;
-            this.vy = 0;
-            this.isGrounded = true;
-        } else {
-            this.p.y = nextY;
-            this.isGrounded = false;
-        }
+        this.p.y = nextY;
+        this.isGrounded = false;
     }
     
     this.v.multiplyScalar(Math.pow(onRoad?PH.DRAG:PH.ODRAG,dt*60));
@@ -987,8 +1061,7 @@ class KartVis{
     this.extraYaw = 0;
   }
   update(body,dt){
-    this.visY = this.visY !== undefined ? lerp(this.visY, body.p.y, 1 - Math.exp(-dt * 20)) : body.p.y;
-    this.g.position.set(body.p.x, this.visY, body.p.z);
+    this.g.position.set(body.p.x, body.p.y, body.p.z);
     
     if(body.stun > 0) this.extraYaw += dt * 25;
     else this.extraYaw = 0;
@@ -1309,6 +1382,7 @@ class RampsManager {
                 const dirX = pNext.x - p.x;
                 const dirZ = pNext.z - p.z;
                 
+                // Align flawlessly via lookAt and order
                 mesh.position.set(p.x, p.y - 0.2, p.z);
                 mesh.rotation.order = 'YXZ';
                 mesh.rotation.y = Math.atan2(dirX, dirZ);
@@ -1328,13 +1402,14 @@ class RampsManager {
                 const dx = r.body.p.x - rm.pos.x;
                 const dz = r.body.p.z - rm.pos.z;
                 
+                // Local coordinate projection for true bounded ramp hits
                 const localX = dx * Math.cos(-rm.ry) - dz * Math.sin(-rm.ry);
                 const localZ = dx * Math.sin(-rm.ry) + dz * Math.cos(-rm.ry);
                 
-                if (Math.abs(localX) < 24 && Math.abs(localZ) < 10) {
+                if (Math.abs(localX) < 24 && Math.abs(localZ) < 8) {
                     if (r.body.p.y > rm.pos.y + 4.0) continue; // Airborne check
                     if (r.body.vy < 20) {
-                        r.body.vy = 35; // Launch
+                        r.body.vy = 45; // Extremely strong launch to prevent magnetic snapping bug
                         r.body.addBoost(1.5); 
                         if(r.isPlayer) {
                             AudioSys.playItem(); 
@@ -1821,6 +1896,7 @@ const UI=(()=>{
     const el=gel('sEnd');
     el.style.opacity=0;
     el.classList.remove('hidden');
+    gel('touchUI').classList.add('hidden'); // hide touch UI when race ends
     setTimeout(()=>el.style.opacity=1,10);
     
     const M=['CHAMPION!','GREAT RACE!','WELL DONE!','KEEP TRYING!'];
@@ -1891,8 +1967,15 @@ const Keys={};let _iUsed=false;
 window.addEventListener('keydown',e=>{Keys[e.code]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();});
 window.addEventListener('keyup',e=>{Keys[e.code]=false;if(e.code==='Space')_iUsed=false;});
 function readInput(){
-  const inp={throttle:(Keys.KeyW||Keys.ArrowUp)?1:0,brake:(Keys.KeyS||Keys.ArrowDown)?1:0,steerLeft:(Keys.KeyA||Keys.ArrowLeft)?1:0,steerRight:(Keys.KeyD||Keys.ArrowRight)?1:0,useItem:false};
-  if(Keys.Space&&!_iUsed){inp.useItem=true;_iUsed=true;}
+  const inp={
+      throttle:(Keys.KeyW||Keys.ArrowUp||TouchInput.gas)?1:0,
+      brake:(Keys.KeyS||Keys.ArrowDown||TouchInput.brake)?1:0,
+      steerLeft:(Keys.KeyA||Keys.ArrowLeft)?1: (TouchInput.steer < 0 ? -TouchInput.steer : 0),
+      steerRight:(Keys.KeyD||Keys.ArrowRight)?1: (TouchInput.steer > 0 ? TouchInput.steer : 0),
+      useItem:false
+  };
+  if((Keys.Space||TouchInput.item)&&!_iUsed){inp.useItem=true;_iUsed=true;}
+  if(!(Keys.Space||TouchInput.item)) _iUsed=false;
   return inp;
 }
 
@@ -1950,11 +2033,13 @@ function teardown(){
 function togglePause() {
     if (gState === 'RACE') {
         gState = 'PAUSE';
+        gel('touchUI').classList.add('hidden');
         const el = gel('sPause');
         el.classList.remove('hidden');
         setTimeout(() => el.style.opacity = 1, 10);
     } else if (gState === 'PAUSE') {
         gState = 'RACE';
+        if('ontouchstart' in window || navigator.maxTouchPoints > 0) gel('touchUI').classList.remove('hidden');
         const el = gel('sPause');
         el.style.opacity = 0;
         setTimeout(() => el.classList.add('hidden'), 400);
@@ -1963,6 +2048,7 @@ function togglePause() {
 }
 
 function boot(){
+  setupTouch();
   UI.load(10,'Renderer Setup...');
   initRenderer();
   
@@ -2038,6 +2124,7 @@ function boot(){
         gel('sEnd').classList.add('hidden');
         gel('mpLobbySetup').classList.remove('hidden');
         gel('mpLobbyRoom').classList.add('hidden');
+        gel('touchUI').classList.add('hidden');
         const badge=gel('mpStatusBadge');if(badge){badge.textContent='● NOT CONNECTED';badge.className='';}
         teardown();
         UI.showMenu();
@@ -2064,6 +2151,7 @@ function startRace(){
   UI.countdown(()=>{
     gState='RACE';raceT0=performance.now()*.001;
     gel('hud').classList.remove('hidden');
+    if('ontouchstart' in window || navigator.maxTouchPoints > 0) gel('touchUI').classList.remove('hidden');
     UI.lapBanner(1,SETTINGS_LAPS);
     if(isMultiplayer) UI.updateMPHud(Object.keys(remoteRacers).length+1);
   });
