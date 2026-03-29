@@ -12,14 +12,14 @@
   #c { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; z-index: 1; }
   .hidden { display: none !important; opacity: 0; pointer-events: none; }
   
-  .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.4s ease; }
+  .screen { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.4s ease; padding: 15px; }
   #sLoad { background: var(--sky); }
-  #sMenu, #sMap, #sMultiplayer { background: radial-gradient(circle at center, rgba(85,187,255,0.85) 0%, rgba(30,120,200,0.95) 100%); backdrop-filter: blur(8px); }
+  #sMenu, #sMap, #sMultiplayer { background: radial-gradient(circle at center, rgba(85,187,255,0.85) 0%, rgba(30,120,200,0.95) 100%); backdrop-filter: blur(8px); overflow-y: auto; }
   #sEnd { background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); }
   #sPause { background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 200; }
   
   /* ARCADE MENU STYLING */
-  .checker-bg { position: absolute; inset: 0; z-index: -1; opacity: 0.15;
+  .checker-bg { position: fixed; inset: 0; z-index: -1; opacity: 0.15;
       background-image: 
           linear-gradient(45deg, #000 25%, transparent 25%), 
           linear-gradient(-45deg, #000 25%, transparent 25%), 
@@ -38,7 +38,7 @@
       50% { transform: skew(-5deg) translateY(-10px) scale(1.05); }
   }
 
-  .box { text-align: center; max-width: 680px; padding: 2.5rem; width: 100%; position: relative; }
+  .box { text-align: center; max-width: 680px; padding: 2.5rem; width: 100%; position: relative; margin: auto; }
   .menu-box { background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(20,20,20,0.9)); border: 4px solid var(--s); border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.6), inset 0 0 20px rgba(251,208,0,0.2); }
   #sMap .box { max-width: 900px; }
   
@@ -56,9 +56,9 @@
   .crow { display: flex; align-items: center; gap: 0.6rem; font-size: 0.9rem; color: white; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
   kbd { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 32px; padding: 0 8px; background: white; border: 2px solid #ccc; border-bottom-width: 4px; border-radius: 6px; font-size: 0.85rem; color: #333; font-family: 'Arial', sans-serif; font-weight: 900; }
   
-  .opts { display: flex; justify-content: center; gap: 1.5rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px dashed rgba(255,255,255,0.3); }
+  .opts { display: flex; justify-content: center; gap: 1.5rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px dashed rgba(255,255,255,0.3); flex-wrap: wrap; }
   .opts label { color: white; font-family: 'Arial Black', sans-serif; font-size: 1rem; text-shadow: 2px 2px 0 var(--p); display: flex; flex-direction: column; gap: 0.5rem; text-align: center; }
-  .opts select { padding: 0.6rem; font-family: 'Arial Black', sans-serif; font-size: 1.1rem; border-radius: 8px; border: 3px solid white; background: var(--s); color: #c97a00; cursor: pointer; outline: none; box-shadow: 0 4px 0 #c97a00; text-align: center; }
+  .opts select { padding: 0.6rem; font-family: 'Arial Black', sans-serif; font-size: 1.1rem; border-radius: 8px; border: 3px solid white; background: var(--s); color: #c97a00; cursor: pointer; outline: none; box-shadow: 0 4px 0 #c97a00; text-align: center; width: 100%; }
   
   .mp-input { width: 100%; padding: 0.8rem; border-radius: 8px; border: 3px solid white; font-family: 'Arial Black', sans-serif; font-size: 1.2rem; text-align: center; text-transform: uppercase; background: rgba(255,255,255,0.9); color: #333; outline: none; }
 
@@ -69,7 +69,7 @@
   .map-icon { width: 100px; height: 100px; background: #3a8040; border: 2px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 8px; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.5); }
   .map-btn:hover .map-icon { border-color: #000; }
 
-  .btn { position: relative; padding: 1.2rem 3.5rem; background: var(--s); color: #fff; border: 4px solid white; border-radius: 12px; font-family: 'Arial Black', Impact, sans-serif; font-size: 1.4rem; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 8px 0 #c97a00, 0 15px 20px rgba(0,0,0,0.3); transition: all 0.1s; transform: skew(-5deg); overflow: hidden; text-shadow: 2px 2px 0 #c97a00; margin-top: 1rem; }
+  .btn { position: relative; padding: 1.2rem 3.5rem; background: var(--s); color: #fff; border: 4px solid white; border-radius: 12px; font-family: 'Arial Black', Impact, sans-serif; font-size: 1.4rem; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; box-shadow: 0 8px 0 #c97a00, 0 15px 20px rgba(0,0,0,0.3); transition: all 0.1s; transform: skew(-5deg); overflow: hidden; text-shadow: 2px 2px 0 #c97a00; margin-top: 1rem; display: block; width: fit-content; margin-left: auto; margin-right: auto; }
   .btn:hover { background: #ffdf33; transform: skew(-5deg) translateY(2px); box-shadow: 0 6px 0 #c97a00, 0 10px 15px rgba(0,0,0,0.3); }
   .btn:active { transform: skew(-5deg) translateY(8px); box-shadow: 0 0 0 #c97a00, 0 2px 5px rgba(0,0,0,0.3); }
 
@@ -85,9 +85,9 @@
   #hudLN { font-family: 'Arial Black', Impact, sans-serif; font-size: 2rem; color: white; text-shadow: 2px 2px 0 var(--b); }
   #hudTM { font-size: 1.4rem; letter-spacing: 2px; min-width: 110px; font-weight: bold; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.5); }
   
-  #hudMP { position: absolute; top: 60px; left: 20px; background: rgba(0,0,0,0.6); border: 2px solid var(--b); border-radius: 10px; padding: 6px 14px; font-size: 0.85rem; font-weight: bold; color: #fff; display: none; }
+  #hudMP { position: absolute; top: 85px; left: 20px; background: rgba(0,0,0,0.6); border: 2px solid var(--b); border-radius: 10px; padding: 6px 14px; font-size: 0.85rem; font-weight: bold; color: #fff; display: none; }
   
-  #hudBtnPause { position: absolute; top: 20px; left: 20px; width: 50px; height: 50px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 3px solid white; color: white; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; box-shadow: 0 4px 0 rgba(0,0,0,0.3); transition: all 0.1s; }
+  #hudBtnPause { position: absolute; top: 20px; left: 20px; width: 50px; height: 50px; border-radius: 50%; background: rgba(0,0,0,0.6); border: 3px solid white; color: white; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; cursor: pointer; pointer-events: auto; box-shadow: 0 4px 0 rgba(0,0,0,0.3); transition: all 0.1s; z-index: 51; }
   #hudBtnPause:hover { background: var(--p); transform: translateY(-2px); box-shadow: 0 6px 0 #901111; }
   #hudBtnPause:active { transform: translateY(2px); box-shadow: 0 0 0 #000; }
 
@@ -97,7 +97,7 @@
   #spdVal { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); font-family: 'Arial Black', Impact, sans-serif; font-size: 2.5rem; line-height: 1; text-shadow: 3px 3px 0 rgba(0,0,0,0.8); color: white; font-style: italic; }
   #spdUnit { font-size: 0.7rem; letter-spacing: 3px; color: var(--s); margin-top: 4px; text-align: center; font-weight: bold; text-shadow: 1px 1px 0 #000; }
   
-  #hudItm { position: absolute; top: 20px; right: 30px; }
+  #hudItm { position: absolute; top: 100px; right: 30px; }
   #itmBox { width: 90px; height: 90px; background: rgba(0,0,0,0.5); border: 4px solid white; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.5), 0 6px 0 rgba(0,0,0,0.3); transition: all 0.2s; position: relative; overflow: hidden; }
   #itmIcon { font-size: 3.5rem; line-height: 1; filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.8)); z-index: 2; transform: scale(1); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
   #itmLbl { font-size: 0.5rem; letter-spacing: 1px; color: rgba(255,255,255,0.6); text-transform: uppercase; font-weight: bold; margin-top: 4px; }
@@ -111,7 +111,7 @@
   #hudMsg { position: absolute; top: 30%; left: 50%; transform: translateX(-50%) scale(0.5); font-family: 'Arial Black', Impact, sans-serif; font-size: 3rem; letter-spacing: 2px; opacity: 0; transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); white-space: nowrap; text-shadow: 4px 4px 0 #000, 0 0 20px currentColor; pointer-events: none; -webkit-text-stroke: 1px black; }
   #hudMsg.show { opacity: 1; transform: translateX(-50%) scale(1); }
   
-  #lapBan { position: absolute; top: 40%; left: 50%; transform: translateX(-50%) scale(0.1); font-family: 'Arial Black', Impact, sans-serif; font-size: 6rem; letter-spacing: 4px; color: var(--s); text-shadow: 6px 6px 0 var(--p), 0 0 40px var(--s); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); white-space: nowrap; -webkit-text-stroke: 2px white; }
+  #lapBan { position: absolute; top: 40%; left: 50%; transform: translateX(-50%) scale(0.1); font-family: 'Arial Black', Impact, sans-serif; font-size: 6rem; letter-spacing: 4px; color: var(--s); text-shadow: 6px 6px 0 var(--p), 0 0 40px var(--s); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); white-space: nowrap; -webkit-text-stroke: 2px white; z-index: 60; }
   #lapBan.show { opacity: 1; transform: translateX(-50%) scale(1) rotate(-5deg); }
   
   #sCnt { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 90; pointer-events: none; background: rgba(0,0,0,0.2); }
@@ -123,7 +123,7 @@
   #hitFlash { position: fixed; inset: 0; pointer-events: none; background: rgba(255,20,20,0.5); opacity: 0; z-index: 61; transition: opacity 0.1s; }
   #hitFlash.on { opacity: 1; }
 
-  #minimap { position: absolute; bottom: 30px; right: 30px; width: 150px; height: 150px; background: rgba(0,0,0,0.4); border: 4px solid white; border-radius: 50%; box-shadow: 0 6px 0 rgba(0,0,0,0.3); backdrop-filter: blur(4px); }
+  #minimap { position: absolute; top: 20px; right: 20px; width: 140px; height: 140px; background: rgba(0,0,0,0.4); border: 4px solid white; border-radius: 50%; box-shadow: 0 6px 0 rgba(0,0,0,0.3); backdrop-filter: blur(4px); z-index: 51; }
   
   #nameLabels { position: fixed; inset: 0; pointer-events: none; z-index: 45; overflow: hidden; }
 
@@ -132,18 +132,50 @@
   #endTime { font-size: 1.5rem; color: white; letter-spacing: 3px; margin-bottom: 1.5rem; font-weight: bold; background: rgba(255,255,255,0.2); padding: 10px 30px; border-radius: 30px; display: inline-block; border: 2px solid white; }
 
   /* TOUCH CONTROLS UI */
-  #touchUI { position: fixed; inset: 0; pointer-events: none; z-index: 55; display: flex; justify-content: space-between; align-items: flex-end; padding: 30px; padding-bottom: 50px; }
-  #joyZone { width: 140px; height: 140px; position: relative; pointer-events: auto; }
-  #joyBase { width: 140px; height: 140px; background: rgba(0,0,0,0.3); border: 3px solid rgba(255,255,255,0.5); border-radius: 50%; position: absolute; bottom: 0; left: 0; display: flex; align-items: center; justify-content: center; }
-  #joyStick { width: 60px; height: 60px; background: rgba(255,255,255,0.9); border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.5); transform: translate(0px, 0px); transition: transform 0.05s linear; }
-  #btnZone { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 15px; pointer-events: auto; transform: translateY(10px); }
-  .t-btn { width: 70px; height: 70px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.8); color: white; font-family: 'Arial Black', sans-serif; font-size: 0.9rem; box-shadow: 0 6px 0 rgba(0,0,0,0.5); opacity: 0.85; transition: transform 0.1s, box-shadow 0.1s; display:flex; justify-content:center; align-items:center; user-select:none; touch-action:none; }
-  .t-btn:active { transform: translateY(6px); box-shadow: 0 0 0 rgba(0,0,0,0.4); opacity: 1; }
-  #btnItem { grid-column: 1 / span 2; justify-self: center; margin-bottom: 0px; width: 60px; height: 60px; font-size:0.8rem; }
+  #touchUI { position: fixed; inset: 0; pointer-events: none; z-index: 55; display: flex; justify-content: space-between; align-items: flex-end; padding: 20px; padding-bottom: 40px; }
+  .touch-group { display: flex; gap: 12px; pointer-events: auto; align-items: flex-end; }
+  .touch-group.col { flex-direction: column; align-items: center; }
+  .touch-row { display: flex; gap: 12px; }
+  .t-btn { width: 70px; height: 70px; border-radius: 50%; border: 3px solid rgba(255,255,255,0.7); color: white; font-family: 'Arial Black', sans-serif; font-size: 1.1rem; font-weight: bold; box-shadow: 0 6px 0 rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; user-select: none; touch-action: none; transition: transform 0.1s, box-shadow 0.1s; }
+  .t-btn:active, .t-btn.active { transform: translateY(6px); box-shadow: 0 0 0 rgba(0,0,0,0.5); border-color: white; opacity: 1; }
+  .btn-gas { background: rgba(67,176,71,0.8); }
+  .btn-brake { background: rgba(229,37,33,0.8); }
+  .btn-steer { background: rgba(0,0,0,0.6); font-size: 1.8rem; }
+  .item-btn { background: rgba(60,170,255,0.8); width: 55px; height: 55px; font-size: 0.85rem; margin-bottom: 5px; }
   
   @media (min-width: 901px) {
       /* Hide touch controls on large screens unless it's a touch device */
       @media (pointer: fine) { #touchUI { display: none !important; } }
+  }
+
+  /* Responsive / Mobile Fixes */
+  @media (max-width: 768px) {
+      .box { padding: 1.5rem; }
+      .gtitle { font-size: 2.8rem; margin-bottom: 1rem; }
+      .gtitle span, .gtitle em { -webkit-text-stroke: 1.5px; text-shadow: 2px 2px 0; }
+      #hudTop { gap: 1rem; padding: 5px 15px; width: auto; max-width: 90vw; top: 10px; }
+      #hudPN { font-size: 2.2rem; }
+      #hudLN { font-size: 1.5rem; }
+      #hudTM { font-size: 1.1rem; min-width: auto; }
+      #minimap { top: 70px; right: 10px; width: 90px; height: 90px; }
+      #hudItm { top: 70px; right: auto; left: 50%; transform: translateX(-50%) scale(0.8); }
+      #hudSpd { bottom: auto; top: 75px; left: 10px; transform: scale(0.65); transform-origin: top left; }
+      #hudMP { top: auto; bottom: 80px; left: 50%; transform: translateX(-50%); }
+      
+      .cgrid { grid-template-columns: 1fr; gap: 0.5rem; }
+      .opts { gap: 1rem; flex-direction: column; }
+      .btn { padding: 1rem 1.5rem; font-size: 1.1rem; width: 100%; margin-top: 0.8rem; }
+      .map-grid { gap: 0.5rem; }
+      .map-btn { width: 110px; padding: 0.5rem; }
+      .map-icon { width: 70px; height: 70px; }
+      #sMap .gtitle { font-size: 2.2rem; }
+      #sMultiplayer .gtitle { font-size: 2.2rem; }
+      
+      #endTitle { font-size: 2.5rem; }
+      #endPos { font-size: 3rem; }
+      #endTime { font-size: 1.2rem; }
+      #lapBan { font-size: 4rem; }
+      #hudMsg { font-size: 2rem; }
   }
 </style>
 </head>
@@ -166,7 +198,7 @@
   <div class="box menu-box">
     <h1 class="gtitle"><span>KART</span><br/><em>RACER</em></h1>
     
-    <div id="mainModeSelect" style="display:flex; flex-direction:column; gap:1.5rem; margin-top:2rem;">
+    <div id="mainModeSelect" style="display:flex; flex-direction:column; gap:1rem; margin-top:1.5rem;">
         <button class="btn" id="btnSinglePlayerMode">SINGLE PLAYER</button>
         <button class="btn" id="btnMultiPlayerMode" style="background:#43b047; border-color:#fff; box-shadow: 0 8px 0 #287a2b, 0 15px 20px rgba(0,0,0,0.3);">MULTIPLAYER</button>
     </div>
@@ -206,8 +238,10 @@
             </label>
           </div>
         </div>
-        <button class="btn" id="btnStart">CONTINUE TO TRACKS</button>
-        <button class="btn" id="btnBackToMode" style="background:#888; font-size:1rem; padding: 0.8rem 2rem; margin-left:10px; box-shadow: 0 4px 0 #555;">BACK</button>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button class="btn" id="btnStart" style="flex: 1; min-width: 200px;">CONTINUE</button>
+            <button class="btn" id="btnBackToMode" style="background:#888; box-shadow: 0 4px 0 #555; margin-top: 1rem;">BACK</button>
+        </div>
     </div>
   </div>
 </div>
@@ -215,7 +249,7 @@
 <div id="sMultiplayer" class="screen hidden">
   <div class="checker-bg"></div>
   <div class="box menu-box">
-    <h1 class="gtitle" style="font-size:3rem; margin-bottom: 0.5rem;"><span>MULTIPLAYER</span></h1>
+    <h1 class="gtitle" style="margin-bottom: 0.5rem;"><span>MULTIPLAYER</span></h1>
     
     <div id="mpLobbySetup">
         <div class="cbox">
@@ -226,7 +260,7 @@
             <button class="btn" id="btnCreateRoom" style="width:100%; margin-bottom:1.5rem; background:var(--p); box-shadow: 0 8px 0 #901111;">CREATE ROOM</button>
             <div style="display:flex; gap:10px; align-items: stretch; margin-top: 1rem;">
                 <input type="text" id="joinCode" class="mp-input" placeholder="ENTER ROOM CODE" maxlength="6"/>
-                <button class="btn" id="btnJoinRoom" style="margin:0; padding: 0 2rem; height: auto;">JOIN</button>
+                <button class="btn" id="btnJoinRoom" style="margin:0; padding: 0 1.5rem; height: auto;">JOIN</button>
             </div>
             <div class="opts" style="margin-top:1.2rem; padding-top:1rem;">
               <label>LAPS
@@ -252,7 +286,7 @@
             <button class="btn hidden" id="btnHostSelectTrack" style="width:100%;">SELECT TRACK &amp; START</button>
             <p id="waitingForHostMsg" style="color:rgba(255,255,255,0.7); margin-top:0.8rem; font-size:0.9rem; display:none;">Waiting for host to select a track...</p>
         </div>
-        <button class="btn" id="btnLeaveRoom" style="background:#888; font-size:1rem; padding: 0.8rem 2rem; box-shadow: 0 4px 0 #555; margin-top:0.5rem;">LEAVE ROOM</button>
+        <button class="btn" id="btnLeaveRoom" style="background:#888; font-size:1rem; padding: 0.8rem 2rem; box-shadow: 0 4px 0 #555; margin-top:1rem;">LEAVE ROOM</button>
     </div>
   </div>
 </div>
@@ -260,7 +294,7 @@
 <div id="sMap" class="screen hidden">
   <div class="checker-bg"></div>
   <div class="box menu-box" style="max-width: 900px;">
-    <h1 class="gtitle" style="font-size:3rem; margin-bottom: 0.5rem;"><span>SELECT</span><br/><em>TRACK</em></h1>
+    <h1 class="gtitle" style="margin-bottom: 0.5rem;"><span>SELECT</span><br/><em>TRACK</em></h1>
     <div class="map-grid" id="mapGrid"></div>
   </div>
 </div>
@@ -270,9 +304,9 @@
   <div class="box menu-box">
     <h1 class="gtitle" style="font-size:3.5rem;"><span>PAUSED</span></h1>
     <div style="display:flex; flex-direction:column; gap:1.2rem; margin-top:2rem; max-width: 400px; margin-left: auto; margin-right: auto;">
-        <button class="btn" id="btnResume">RESUME RACE</button>
-        <button class="btn" id="btnToggleSound" style="background:#3caaff; box-shadow: 0 8px 0 #187bcd;">SOUND: ON</button>
-        <button class="btn" id="btnQuitMatch" style="background:#e52521; box-shadow: 0 8px 0 #901111;">LEAVE MATCH</button>
+        <button class="btn" id="btnResume" style="width: 100%;">RESUME RACE</button>
+        <button class="btn" id="btnToggleSound" style="background:#3caaff; box-shadow: 0 8px 0 #187bcd; width: 100%;">SOUND: ON</button>
+        <button class="btn" id="btnQuitMatch" style="background:#e52521; box-shadow: 0 8px 0 #901111; width: 100%;">LEAVE MATCH</button>
     </div>
   </div>
 </div>
@@ -292,13 +326,18 @@
 
 <!-- Mobile Touch UI -->
 <div id="touchUI" class="hidden">
-  <div id="joyZone">
-    <div id="joyBase"><div id="joyStick"></div></div>
+  <!-- Left Side: Gas, Brake, Item -->
+  <div class="touch-group col">
+    <button id="btnItem" class="t-btn item-btn">ITEM</button>
+    <div class="touch-row">
+      <button id="btnBrake" class="t-btn btn-brake">BRK</button>
+      <button id="btnGas" class="t-btn btn-gas">GAS</button>
+    </div>
   </div>
-  <div id="btnZone">
-    <button id="btnItem" class="t-btn" style="background:rgba(60,170,255,0.8); border-color:#fff;">ITEM</button>
-    <button id="btnBrake" class="t-btn" style="background:rgba(229,37,33,0.8); border-color:#fff;">BRK</button>
-    <button id="btnGas" class="t-btn" style="background:rgba(67,176,71,0.8); border-color:#fff;">GAS</button>
+  <!-- Right Side: Steer Left, Steer Right -->
+  <div class="touch-group">
+    <button id="btnLeft" class="t-btn btn-steer">◀</button>
+    <button id="btnRight" class="t-btn btn-steer">▶</button>
   </div>
 </div>
 
@@ -386,54 +425,23 @@ function cr(p0,p1,p2,p3,t){const t2=t*t,t3=t2*t;return .5*((2*p1)+(-p0+p2)*t+(2*
 function gel(id){return document.getElementById(id)}
 
 // ── Touch Inputs ──────────────────────────────────────────────
-const TouchInput = { gas: false, brake: false, item: false, steer: 0 };
+const TouchInput = { gas: false, brake: false, item: false, left: false, right: false };
 function setupTouch() {
-    const joyBase = gel('joyBase');
-    const joyStick = gel('joyStick');
-    let joyActive = false;
-    let joyCenterX = 0;
-
-    joyBase.addEventListener('touchstart', e => {
-        e.preventDefault();
-        joyActive = true;
-        const rect = joyBase.getBoundingClientRect();
-        joyCenterX = rect.left + rect.width / 2;
-        updateJoy(e.touches[0]);
-    }, {passive: false});
-
-    joyBase.addEventListener('touchmove', e => {
-        e.preventDefault();
-        if(!joyActive) return;
-        updateJoy(e.touches[0]);
-    }, {passive: false});
-
-    const endJoy = (e) => {
-        e.preventDefault();
-        joyActive = false;
-        TouchInput.steer = 0;
-        joyStick.style.transform = `translate(0px, 0px)`;
-    };
-    joyBase.addEventListener('touchend', endJoy);
-    joyBase.addEventListener('touchcancel', endJoy);
-
-    function updateJoy(t) {
-        let dx = t.clientX - joyCenterX;
-        let maxDist = 40; 
-        TouchInput.steer = clamp(dx / maxDist, -1, 1);
-        joyStick.style.transform = `translate(${TouchInput.steer * maxDist}px, 0px)`;
-    }
-
     const bindBtn = (id, key) => {
         const el = gel(id);
-        el.addEventListener('touchstart', e => { e.preventDefault(); TouchInput[key] = true; el.style.transform='translateY(6px)'; el.style.boxShadow='0 0 0 #000'; });
-        const endBtn = e => { e.preventDefault(); TouchInput[key] = false; el.style.transform=''; el.style.boxShadow=''; };
-        el.addEventListener('touchend', endBtn);
-        el.addEventListener('touchcancel', endBtn);
+        if(!el) return;
+        const press = e => { e.preventDefault(); TouchInput[key] = true; el.classList.add('active'); };
+        const release = e => { e.preventDefault(); TouchInput[key] = false; el.classList.remove('active'); };
+        el.addEventListener('touchstart', press, {passive: false});
+        el.addEventListener('touchend', release, {passive: false});
+        el.addEventListener('touchcancel', release, {passive: false});
     };
 
     bindBtn('btnGas', 'gas');
     bindBtn('btnBrake', 'brake');
     bindBtn('btnItem', 'item');
+    bindBtn('btnLeft', 'left');
+    bindBtn('btnRight', 'right');
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -477,8 +485,8 @@ class RemoteRacer {
         this.vis.setShield(this.body.shield); 
     }
     progress() { 
-        if (this.done) return 1000000 + (100 - (this._finalPos || this.racePos));
-        return this.trueSpIdx || 0; 
+        if (this.done) return 10000000 + (100 - (this._finalPos || this.racePos));
+        return (this.lap * 100000) + (this.trueSpIdx || 0); 
     }
     destroy(scene) { this.vis.remove(scene); }
 }
@@ -1158,7 +1166,7 @@ class Racer{
     this.nextCp=1;this.done=false;this._finalPos=null;
     this.racePos=idx+1;
     this.spIdx=Track.nearestIdx(this.body.p);
-    this.trueSpIdx=this.spIdx;
+    this.trueSpIdx=0;
     this.item=null;this._cps=cps;this._scene=scene;
     this.name=isPlayer ? myPlayerName : "BOT " + idx;
   }
@@ -1273,8 +1281,8 @@ class Racer{
   }
   giveItem(t){if(this.item)return;this.item=t;if(this.isPlayer)UI.setItem(t);}
   progress(){
-      if(this.done) return 1000000 + (100 - (this._finalPos || this.racePos));
-      return this.trueSpIdx;
+      if(this.done) return 10000000 + (100 - (this._finalPos || this.racePos));
+      return (this.lap * 100000) + this.trueSpIdx;
   }
   destroy(){this.vis.remove(this._scene);}
 }
@@ -1307,7 +1315,7 @@ class AI{
     for(const rx of all)if(rx.isPlayer)playerProg=rx.progress();
     let catchUp=1,distBehind=playerProg-myProg;
     
-    if(distBehind>10)catchUp=1+this.skill*.3;else if(distBehind<-20)catchUp=.95;
+    if(distBehind>100)catchUp=1+this.skill*.3;else if(distBehind<-200)catchUp=.95;
     const maxSpeed=PH.MAX*lerp(.9, 1.1, this.skill)*catchUp; 
     
     const farAngle=Math.atan2(far.x-b.p.x,far.z-b.p.z);
@@ -1693,7 +1701,7 @@ const Cam=(()=>{
 //  MINIMAP & FLOATING NAMES
 // ══════════════════════════════════════════════════════════════
 const MMap=(()=>{
-  let ctx,W=150,H=150,sp,rc,mnX,mxX,mnZ,mxZ,sx,sz,cx,cz;
+  let ctx,W=140,H=140,sp,rc,mnX,mxX,mnZ,mxZ,sx,sz,cx,cz;
   function init(racers){
     rc=racers;sp=Track.getWaypts();mnX=mnZ=Infinity;mxX=mxZ=-Infinity;
     for(const p of sp){if(p.x<mnX)mnX=p.x;if(p.x>mxX)mxX=p.x;if(p.z<mnZ)mnZ=p.z;if(p.z>mxZ)mxZ=p.z;}
@@ -1701,6 +1709,7 @@ const MMap=(()=>{
     const rangeX = mxX - mnX;
     const rangeZ = mxZ - mnZ;
     const maxRange = Math.max(rangeX, rangeZ) || 1;
+    if(window.innerWidth <= 768) { W=90; H=90; } else { W=140; H=140; }
     sx = (W - pad*2) / maxRange;
     sz = (H - pad*2) / maxRange;
     cx = (mxX + mnX) / 2;
@@ -1735,7 +1744,7 @@ function renderNameTags() {
         if (p.z < 1 && p.x > -1 && p.x < 1 && p.y > -1 && p.y < 1) {
             let px = (p.x * 0.5 + 0.5) * w;
             let py = (-(p.y * 0.5) + 0.5) * h;
-            html += `<div style="position:absolute; left:${px}px; top:${py}px; transform:translate(-50%, -100%); color:white; font-family:'Arial Black',sans-serif; font-size:14px; -webkit-text-stroke:1px black; text-shadow:2px 2px 0 #000;">${rr.name}</div>`;
+            html += `<div style="position:absolute; left:${px}px; top:${py}px; transform:translate(-50%, -100%); color:white; font-family:'Arial Black',sans-serif; font-size:16px; font-weight:bold; -webkit-text-stroke:1px black; text-shadow:2px 2px 0 #000;">${rr.name}</div>`;
         }
     }
     container.innerHTML = html;
@@ -1960,7 +1969,11 @@ function initRenderer(){
   sun.shadow.camera.left=sun.shadow.camera.bottom=-600;sun.shadow.camera.right=sun.shadow.camera.top=600;
   sun.shadow.camera.near=10;sun.shadow.camera.far=1000;sun.shadow.mapSize.set(2048,2048);sun.shadow.bias=-.0005;scene.add(sun);
   clouds=buildSky(scene);
-  window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
+  window.addEventListener('resize',()=>{
+      camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth,innerHeight);
+      if(gState === 'RACE') MMap.init(racers); // Update minimap sizing on orientation change
+  });
 }
 
 const Keys={};let _iUsed=false;
@@ -1970,8 +1983,8 @@ function readInput(){
   const inp={
       throttle:(Keys.KeyW||Keys.ArrowUp||TouchInput.gas)?1:0,
       brake:(Keys.KeyS||Keys.ArrowDown||TouchInput.brake)?1:0,
-      steerLeft:(Keys.KeyA||Keys.ArrowLeft)?1: (TouchInput.steer < 0 ? -TouchInput.steer : 0),
-      steerRight:(Keys.KeyD||Keys.ArrowRight)?1: (TouchInput.steer > 0 ? TouchInput.steer : 0),
+      steerLeft:(Keys.KeyA||Keys.ArrowLeft||TouchInput.left)?1:0,
+      steerRight:(Keys.KeyD||Keys.ArrowRight||TouchInput.right)?1:0,
       useItem:false
   };
   if((Keys.Space||TouchInput.item)&&!_iUsed){inp.useItem=true;_iUsed=true;}
@@ -2058,6 +2071,10 @@ function boot(){
   buildGame();
   UI.load(100,'Ready to Race!');
   
+  gel('playerNameInput').addEventListener('change', (e) => {
+      myPlayerName = e.target.value.trim().toUpperCase() || "RACER";
+  });
+
   setTimeout(()=>{
     UI.hideLoad();UI.showMenu();gState='MENU';
 
