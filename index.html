@@ -85,12 +85,18 @@
   #mpStatusBadge.error { border-color: var(--p); background: rgba(229,37,33,0.3); }
 
   #hud { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
-  #hudTop { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 2.5rem; background: rgba(0,0,0,0.6); border: 3px solid rgba(255,255,255,0.8); border-radius: 50px; padding: 10px 30px; box-shadow: 0 6px 0 rgba(0,0,0,0.3); backdrop-filter: blur(4px); }
-  .hl { font-size: 0.7rem; letter-spacing: 2px; color: var(--s); text-transform: uppercase; margin-right: 6px; font-weight: bold; }
-  #hudPN { font-family: 'Arial Black', Impact, sans-serif; font-size: 3rem; color: white; line-height: 0.9; text-shadow: 3px 3px 0 var(--p); }
-  #hudPS { font-size: 1.2rem; color: white; font-weight: bold; text-shadow: 2px 2px 0 var(--p); }
-  #hudLN { font-family: 'Arial Black', Impact, sans-serif; font-size: 2rem; color: white; text-shadow: 2px 2px 0 var(--b); }
-  #hudTM { font-size: 1.4rem; letter-spacing: 2px; min-width: 110px; font-weight: bold; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.5); }
+  
+  /* REDESIGNED TOP HUD */
+  #hudTop { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 1.5rem; background: linear-gradient(180deg, rgba(30,30,30,0.95) 0%, rgba(10,10,10,0.85) 100%); border: 2px solid rgba(255,255,255,0.15); border-bottom-color: rgba(255,255,255,0.4); border-radius: 12px; padding: 8px 25px; box-shadow: 0 6px 15px rgba(0,0,0,0.5); backdrop-filter: blur(8px); }
+  .hud-group { display: flex; align-items: baseline; justify-content: center; }
+  .hud-div { width: 2px; height: 35px; background: linear-gradient(180deg, transparent, rgba(255,255,255,0.2), transparent); margin: 0 5px; }
+  .hl { font-size: 0.75rem; letter-spacing: 1px; color: var(--s); text-transform: uppercase; margin-right: 8px; font-weight: bold; text-shadow: 1px 1px 0 #000; }
+  #hudPN { font-family: 'Arial Black', Impact, sans-serif; font-size: 2.8rem; color: white; line-height: 0.8; text-shadow: 2px 2px 0 var(--p); }
+  #hudPS { font-size: 1.1rem; color: white; font-weight: bold; margin-left: 2px; text-shadow: 2px 2px 0 var(--p); }
+  #hudPT { font-size: 1.2rem; font-weight: bold; color: rgba(255,255,255,0.5); margin-left: 6px; }
+  #hudLN { font-family: 'Arial Black', Impact, sans-serif; font-size: 2.2rem; color: white; text-shadow: 2px 2px 0 var(--b); line-height: 0.8; }
+  #hudLT { font-size: 1.4rem; font-weight: bold; color: rgba(255,255,255,0.7); }
+  #hudTM { font-family: 'Courier New', monospace; font-size: 1.6rem; letter-spacing: 1px; min-width: 120px; font-weight: bold; color: white; text-shadow: 2px 2px 0 rgba(0,0,0,0.8); text-align: right; }
   
   #hudMP { position: absolute; top: 85px; left: 20px; background: rgba(0,0,0,0.6); border: 2px solid var(--b); border-radius: 10px; padding: 6px 14px; font-size: 0.85rem; font-weight: bold; color: #fff; display: none; }
   
@@ -190,7 +196,7 @@
       #playerListUI { gap: 4px; }
       #playerListUI div { padding: 4px 8px !important; font-size: 0.7rem !important; }
 
-      #hudTop { transform: translateX(-50%) scale(0.8); top: 5px; }
+      #hudTop { transform: translateX(-50%) scale(0.85); top: 5px; }
       
       #touchUI { padding: 10px; padding-bottom: 15px; }
       .t-btn { width: 75px; height: 75px; font-size: 1.1rem; border-width: 3px; }
@@ -202,10 +208,16 @@
 
   @media (max-width: 768px) {
       .gtitle { font-size: 2.5rem; margin-bottom: 0.8rem; }
-      #hudTop { gap: 1rem; padding: 5px 15px; width: auto; max-width: 90vw; top: 10px; }
-      #hudPN { font-size: 2.2rem; }
-      #hudLN { font-size: 1.5rem; }
-      #hudTM { font-size: 1.1rem; min-width: auto; }
+      #hudTop { gap: 0.5rem; padding: 5px 10px; width: auto; max-width: 95vw; top: 10px; border-radius: 8px; }
+      #hudPN { font-size: 1.8rem; }
+      #hudPS { font-size: 0.8rem; }
+      #hudPT { font-size: 1rem; }
+      #hudLN { font-size: 1.6rem; }
+      #hudLT { font-size: 1.1rem; }
+      #hudTM { font-size: 1.2rem; min-width: auto; }
+      .hl { font-size: 0.6rem; margin-right: 4px; }
+      .hud-div { height: 25px; margin: 0 2px; }
+      
       #minimap { top: 70px; right: 10px; width: 90px; height: 90px; }
       #hudItm { top: 70px; right: auto; left: 50%; transform: translateX(-50%) scale(0.8); }
       #hudSpd { bottom: auto; top: 75px; left: 10px; transform: scale(0.65); transform-origin: top left; }
@@ -395,13 +407,23 @@
 <div id="hud" class="hidden">
   <div id="hudBtnPause" title="Pause Game (Esc)">⏸</div>
   <div id="hudTop">
-    <div style="display:flex;align-items:baseline;gap:4px">
+    <div class="hud-group">
+      <span class="hl">POS</span>
       <span id="hudPN">1</span><span id="hudPS">ST</span>
+      <span id="hudPT">/ 6</span>
     </div>
-    <div style="width:3px;height:35px;background:rgba(255,255,255,0.4);border-radius:2px"></div>
-    <div><span class="hl">LAP</span><span id="hudLN">1</span><span style="color:rgba(255,255,255,.5);margin:0 6px;font-size:1.4rem">/</span><span id="hudLT" style="font-size:1.6rem;font-weight:bold">3</span></div>
-    <div style="width:3px;height:35px;background:rgba(255,255,255,0.4);border-radius:2px"></div>
-    <div><span class="hl">TIME</span><span id="hudTM">0:00.000</span></div>
+    <div class="hud-div"></div>
+    <div class="hud-group">
+      <span class="hl">LAP</span>
+      <span id="hudLN">1</span>
+      <span style="color:rgba(255,255,255,.5);margin:0 6px;font-size:1.4rem;font-weight:bold;">/</span>
+      <span id="hudLT">3</span>
+    </div>
+    <div class="hud-div"></div>
+    <div class="hud-group">
+      <span class="hl" style="margin-right: 4px;">TIME</span>
+      <span id="hudTM">0:00.000</span>
+    </div>
   </div>
   
   <div id="hudMP">🌐 <span id="hudMPCount">1</span> PLAYERS</div>
@@ -527,13 +549,17 @@ class RemoteRacer {
         this.done = false;
         this._finalPos = null;
         this.racePos = idx + 1;
-        this.name = id.substring(0,4).toUpperCase();
+        this.name = "RACER"; // Avoid flashing a random string before sync update arrives
         this.body = new Body(startPos.pos, startPos.angle, true);
         this.vis = new KartVis(idx, scene);
         this.target = { p: startPos.pos.clone(), h: startPos.angle };
         this.lap = 1;
-        this.spIdx = 0;
-        this.trueSpIdx = 0;
+        
+        // Ensure local tracking of spine index exists immediately to fix race rankings
+        this.spIdx = Track.nearestIdx(this.body.p);
+        const tot = Track.getSpine().length || 1;
+        this.trueSpIdx = this.spIdx > tot/2 ? this.spIdx - tot : this.spIdx;
+        this.body.spIdx = this.spIdx;
     }
     update(dt) {
         this.body.p.lerp(this.target.p, clamp(dt * 15, 0, 1));
@@ -543,6 +569,16 @@ class RemoteRacer {
         
         this.body.vy = (this.target.p.y - this.body.p.y) / Math.max(dt, 0.01);
         this.body.isGrounded = Math.abs(this.body.vy) < 5;
+        
+        // Fix for rank getting stuck! Calculate true progression locally without waiting for server TrueSpIdx
+        let newIdx = Track.nearestIdx(this.body.p, this.spIdx);
+        let diff = newIdx - this.spIdx;
+        const tot = Track.getSpine().length;
+        if(diff < -tot/2) diff += tot;
+        else if(diff > tot/2) diff -= tot;
+        this.trueSpIdx += diff;
+        this.spIdx = newIdx;
+        this.body.spIdx = newIdx;
         
         this.vis.update(this.body, dt);
         this.vis.setShield(this.body.shield); 
@@ -677,7 +713,7 @@ const MP = {
                 }
 
                 const rr = remoteRacers[id];
-                if (pd.name !== undefined) rr.name = pd.name;
+                if (pd.name !== undefined && pd.name !== "") rr.name = pd.name;
                 if (pd.p) rr.target.p.set(pd.p.x ?? 0, pd.p.y ?? 0, pd.p.z ?? 0);
                 if (pd.h !== undefined) rr.target.h = pd.h;
                 if (pd.spd !== undefined) rr.body.spd = pd.spd;
@@ -685,8 +721,7 @@ const MP = {
                 if (pd.shield !== undefined) rr.body.shield = pd.shield;
                 if (pd.stun !== undefined) rr.body.stun = pd.stun;
                 if (pd.lap !== undefined) rr.lap = pd.lap;
-                if (pd.spIdx !== undefined) rr.spIdx = pd.spIdx;
-                if (pd.trueSpIdx !== undefined) rr.trueSpIdx = pd.trueSpIdx;
+                // pd.trueSpIdx is specifically skipped here since we calculate it beautifully locally for perfect tracking!
                 if (pd.done !== undefined) rr.done = pd.done;
                 if (pd.finalPos !== undefined) rr._finalPos = pd.finalPos;
             }
@@ -746,7 +781,6 @@ const MP = {
             shield: player.body.shield,
             stun: player.body.stun,
             lap: player.lap,
-            spIdx: player.spIdx,
             trueSpIdx: player.trueSpIdx,
             done: player.done,
             finalPos: player._finalPos
@@ -850,27 +884,49 @@ const Track=(()=>{
     }
   }
 
-  function nearestIdx(pos,curIdx=-1){
-    if(curIdx>=0&&spine.length>0){
-      let best=curIdx,bd=Infinity;
-      const len=spine.length;
-      for(let i=-30;i<=30;i++){let idx=(curIdx+i+len)%len;let dx=spine[idx].x-pos.x,dz=spine[idx].z-pos.z,d=dx*dx+dz*dz;if(d<bd){bd=d;best=idx;}}
+  function nearestIdx(pos, curIdx = -1) {
+    if (curIdx >= 0 && spine.length > 0) {
+      let best = curIdx, bd = Infinity;
+      const len = spine.length;
+      // Fixed: Search radius shrunk to prevent 3D elevation overlaps snapping to ground
+      for (let i = -15; i <= 15; i++) {
+        let idx = (curIdx + i + len) % len;
+        let dx = spine[idx].x - pos.x, dz = spine[idx].z - pos.z;
+        let d = dx * dx + dz * dz;
+        if (d < bd) { bd = d; best = idx; }
+      }
       return best;
     }
-    const gx=Math.floor(pos.x/GCELL),gz=Math.floor(pos.z/GCELL);
-    let best=-1,bd=Infinity;
-    for(let dx=-2;dx<=2;dx++)for(let dz=-2;dz<=2;dz++){const cell=grid[(gx+dx)+`|`+(gz+dz)];if(!cell)continue;for(const i of cell){const ddx=spine[i].x-pos.x,ddz=spine[i].z-pos.z,d=ddx*ddx+ddz*ddz;if(d<bd){bd=d;best=i;}}}
-    if(best===-1){for(let i=0;i<spine.length;i++){const ddx=spine[i].x-pos.x,ddz=spine[i].z-pos.z,d=ddx*ddx+ddz*ddz;if(d<bd){bd=d;best=i;}}}
+    const gx = Math.floor(pos.x / GCELL), gz = Math.floor(pos.z / GCELL);
+    let best = -1, bd = Infinity;
+    for (let dx = -2; dx <= 2; dx++) {
+      for (let dz = -2; dz <= 2; dz++) {
+        const cell = grid[(gx + dx) + `|` + (gz + dz)];
+        if (!cell) continue;
+        for (const i of cell) {
+          const ddx = spine[i].x - pos.x, ddz = spine[i].z - pos.z;
+          const d = ddx * ddx + ddz * ddz;
+          if (d < bd) { bd = d; best = i; }
+        }
+      }
+    }
+    if (best === -1) {
+      for (let i = 0; i < spine.length; i++) {
+        const ddx = spine[i].x - pos.x, ddz = spine[i].z - pos.z;
+        const d = ddx * ddx + ddz * ddz;
+        if (d < bd) { bd = d; best = i; }
+      }
+    }
     return best;
   }
   
   // Flawless Line-Segment Projection Elevation! ZERO Shaking!
-  function getElevation(pos) {
+  function getElevation(pos, curIdx = -1) {
       if (spine.length === 0) return 0;
       let bestDistSq = Infinity;
       let bestY = 0;
       const len = spine.length;
-      const cIdx = nearestIdx(pos);
+      const cIdx = nearestIdx(pos, curIdx);
       
       for(let i = -3; i <= 3; i++) {
           const idx1 = (cIdx + i + len) % len;
@@ -900,8 +956,16 @@ const Track=(()=>{
       return bestY;
   }
 
-  function onRoad(pos,curIdx=-1){const i=nearestIdx(pos,curIdx),s=spine[i],dx=pos.x-s.x,dz=pos.z-s.z;return dx*dx+dz*dz<(RW*.52)*(RW*.52);}
-  function roadFrac(pos,curIdx=-1){const i=nearestIdx(pos,curIdx),s=spine[i],dx=pos.x-s.x,dz=pos.z-s.z,h=RW*.5;return clamp(1-Math.sqrt(dx*dx+dz*dz)/h,0,1);}
+  function onRoad(pos, curIdx = -1) {
+      const i = nearestIdx(pos, curIdx), s = spine[i];
+      const dx = pos.x - s.x, dz = pos.z - s.z;
+      return dx * dx + dz * dz < (RW * .52) * (RW * .52);
+  }
+  function roadFrac(pos, curIdx = -1) {
+      const i = nearestIdx(pos, curIdx), s = spine[i];
+      const dx = pos.x - s.x, dz = pos.z - s.z, h = RW * .5;
+      return clamp(1 - Math.sqrt(dx * dx + dz * dz) / h, 0, 1);
+  }
 
   function buildScene(scene){
     const grp=new THREE.Group();
@@ -1016,11 +1080,13 @@ class Body{
     this.vy=0; 
     this.isGrounded=true;
     this.fx=0;this.fz=1;this.isRemote=isRemote;this.steerVal=0;
+    this.spIdx = -1;
   }
-  step(inp,dt,onRoadRaw){
+  step(inp,dt,onRoadRaw,spIdx=-1){
     if(this.stun>0){this.stun-=dt;inp={throttle:0,brake:0,steerLeft:0,steerRight:0};}
     
-    const groundY = Track.getElevation(this.p);
+    this.spIdx = spIdx !== -1 ? spIdx : this.spIdx;
+    const groundY = Track.getElevation(this.p, this.spIdx);
     let onRoad = onRoadRaw || this.p.y > groundY + 1.0; 
     
     if(this.starTimer>0){
@@ -1031,22 +1097,29 @@ class Body{
         if(this.btimer>0){this.boost=true;this.btimer-=dt;} else { this.boost=false; }
     }
     
-    this.vy -= 120 * dt; // Stronger Gravity
+    this.vy -= 140 * dt; // Gravity
     let nextY = this.p.y + this.vy * dt;
     
-    // Aggressively stick to the ground if traveling downhill
-    if (nextY <= groundY + 0.1) {
-        if (this.vy < -15 && !this.isRemote && !this.isGrounded) Parts.spawnSpark(this.p, 0xaaaaaa, 10);
-        this.p.y = groundY;
-        this.vy = 0;
-        this.isGrounded = true;
-    } else if (this.isGrounded && nextY < groundY + 4.5 && this.vy <= 0) {
-        this.p.y = groundY;
-        this.vy = 0;
-        this.isGrounded = true;
-    } else {
-        this.p.y = nextY;
-        this.isGrounded = false;
+    if (this.isGrounded) {
+        if (this.vy > 0) { // Explicitly launched upward (ramp)
+            this.isGrounded = false;
+            this.p.y = nextY;
+        } else if (groundY < nextY - 4.0) { // Dropped off a sheer cliff
+            this.isGrounded = false;
+            this.p.y = nextY;
+        } else { // Stick to ground firmly
+            this.p.y = groundY;
+            this.vy = 0;
+        }
+    } else { // Airborne
+        if (nextY <= groundY) { // Landed
+            if (this.vy < -15 && !this.isRemote) Parts.spawnSpark(this.p, 0xaaaaaa, 10);
+            this.p.y = groundY;
+            this.vy = 0;
+            this.isGrounded = true;
+        } else {
+            this.p.y = nextY;
+        }
     }
     
     this.v.multiplyScalar(Math.pow(onRoad?PH.DRAG:PH.ODRAG,dt*60));
@@ -1097,9 +1170,9 @@ function resolveCollisions(bodies){
 }
 function resolveWall(body){
   if(body.isRemote || !body.isGrounded)return; 
-  const frac=Track.roadFrac(body.p);
+  const frac=Track.roadFrac(body.p, body.spIdx);
   if(frac<=0){
-    const i=Track.nearestIdx(body.p),s=Track.getSpine()[i];
+    const i=Track.nearestIdx(body.p, body.spIdx),s=Track.getSpine()[i];
     const dx=s.x-body.p.x,dz=s.z-body.p.z,d=Math.sqrt(dx*dx+dz*dz);
     if(d>.05){const nx=dx/d,nz=dz/d,dot=body.v.x*nx+body.v.z*nz;if(dot<0){body.v.x-=dot*nx*1.2;body.v.z-=dot*nz*1.2;}body.v.x*=0.85;body.v.z*=0.85;const overlap=d-Track.RW*.46;if(overlap>0){body.p.x+=nx*overlap;body.p.z+=nz*overlap;}}
   }
@@ -1140,12 +1213,15 @@ class KartVis{
     this.g.rotation.y = body.h + this.extraYaw;
     this.g.rotation.z = lerp(this.g.rotation.z,-body.steerVal*.12,.15);
     
-    const frontPos = { x: body.p.x + Math.sin(body.h)*3, z: body.p.z + Math.cos(body.h)*3 };
-    const backPos = { x: body.p.x - Math.sin(body.h)*3, z: body.p.z - Math.cos(body.h)*3 };
-    const targetPitch = -Math.atan2(Track.getElevation(frontPos) - Track.getElevation(backPos), 6);
+    const frontPos = { x: body.p.x + Math.sin(body.h)*2, z: body.p.z + Math.cos(body.h)*2 };
+    const backPos = { x: body.p.x - Math.sin(body.h)*2, z: body.p.z - Math.cos(body.h)*2 };
+    const targetPitch = -Math.atan2(Track.getElevation(frontPos, body.spIdx) - Track.getElevation(backPos, body.spIdx), 4) * 0.6; 
     
-    let pitch = (!body.isGrounded && Math.abs(body.vy) > 1) ? -body.vy * 0.015 : targetPitch;
-    this.g.rotation.x = lerp(this.g.rotation.x, clamp(pitch, -0.6, 0.6), 1 - Math.exp(-dt*15));
+    let pitch = targetPitch;
+    if (!body.isGrounded) {
+        pitch = clamp(-body.vy * 0.01, -0.4, 0.4); // Subtle tilt when jumping/falling
+    }
+    this.g.rotation.x = lerp(this.g.rotation.x, pitch, 1 - Math.exp(-dt*8)); // Smoother interpolation
     
     if(body.starTimer > 0){
         const hue = (Date.now() % 1000) / 1000;
@@ -1228,10 +1304,11 @@ class Racer{
     this.lap=1;this.cpHit=new Set();this.cpHit.add(0);
     this.nextCp=1;this.done=false;this._finalPos=null;
     this.racePos=idx+1;
-    this.spIdx=Track.nearestIdx(this.body.p);
     
     // Position initialization fix - enables correct live ranking right from the start!
-    const tot = Track.getSpine().length;
+    this.spIdx=Track.nearestIdx(this.body.p);
+    this.body.spIdx = this.spIdx;
+    const tot = Track.getSpine().length || 1;
     this.trueSpIdx = this.spIdx > tot/2 ? this.spIdx - tot : this.spIdx;
     
     this.item=null;this._cps=cps;this._scene=scene;
@@ -1240,16 +1317,17 @@ class Racer{
   update(inp,dt){
     if(this.done){if(this.isPlayer)AudioSys.updateEngine(0,true);return;}
     
-    const road = Track.onRoad(this.body.p);
-    if(inp)this.body.step(inp,dt,road);
+    const road = Track.onRoad(this.body.p, this.spIdx);
+    if(inp)this.body.step(inp,dt,road,this.spIdx); // Pass spIdx for stable elevation
     
-    let newIdx = Track.nearestIdx(this.body.p);
+    let newIdx = Track.nearestIdx(this.body.p, this.spIdx); // Local search!
     let diff = newIdx - this.spIdx;
     const tot = Track.getSpine().length;
     if(diff < -tot/2) diff += tot;
     else if(diff > tot/2) diff -= tot;
     this.trueSpIdx += diff;
     this.spIdx = newIdx;
+    this.body.spIdx = newIdx;
     
     this.vis.update(this.body,dt);
     this.vis.setShield(this.body.shield);
@@ -1326,30 +1404,12 @@ class Racer{
     } else if(t==='star'){
       this.body.starTimer = 4.0;
       if(this.isPlayer)UI.flash('⭐ STAR POWER!',0xffff00);
-    } else if (t==='lightning') {
-        if(this.isPlayer) {
-            UI.flash('🌩 LIGHTNING STRIKE!', 0x00ffff);
-            const overlay = document.createElement('div');
-            overlay.style.cssText = 'position:fixed;inset:0;background:white;z-index:9999;pointer-events:none;opacity:0.8;transition:opacity 1s;';
-            document.body.appendChild(overlay);
-            setTimeout(()=>overlay.style.opacity=0, 50);
-            setTimeout(()=>overlay.remove(), 1050);
-        }
-        for(const r of allLocalRacers) {
-            if(r===this || r.done || r.body.starTimer > 0) continue;
-            if(r.body.shield) {
-                r.body.shield = false; r.body.stimer = 0;
-                continue;
-            }
-            r.body.spd = -10; r.body.vy = 8; r.body.stun = 1.5;
-            Parts.explode(r.body.p);
-        }
-    }
+    } 
   }
   giveItem(t){if(this.item)return;this.item=t;if(this.isPlayer)UI.setItem(t);}
   progress(){
       if(this.done) return 10000000 + (100 - (this._finalPos || this.racePos));
-      return (this.lap * 100000) + this.trueSpIdx;
+      return (this.lap * 100000) + (this.trueSpIdx || 0);
   }
   destroy(){this.vis.remove(this._scene);}
 }
@@ -1362,7 +1422,7 @@ class AI{
   update(dt,all){
     const r=this.r,b=r.body,spine=Track.getSpine(),spTot=spine.length;
     if(!spTot||r.done){this.inp.throttle=0;b.step(this.inp,dt,Track.onRoad(b.p,r.spIdx));return;}
-    if(this._revT>0){this._revT-=dt;this.inp.throttle=0;this.inp.brake=1;this.inp.steerRight=this._revDir>0?1:0;this.inp.steerLeft=this._revDir<0?1:0;b.step(this.inp,dt,Track.onRoad(b.p,r.spIdx));return;}
+    if(this._revT>0){this._revT-=dt;this.inp.throttle=0;this.inp.brake=1;this.inp.steerRight=this._revDir>0?1:0;this.inp.steerLeft=this._revDir<0?1:0;b.step(this.inp,dt,Track.onRoad(b.p,r.spIdx), r.spIdx);return;}
     const sr=Math.abs(b.spd)/PH.MAX;
     const nearIdx=(r.spIdx+Math.floor(10+sr*15))%spTot;
     const farIdx=(r.spIdx+Math.floor(20+sr*20))%spTot;
@@ -1407,14 +1467,13 @@ class AI{
       else if(r.item==='shield')this.inp.useItem=true;
       else if(r.item==='banana')this.inp.useItem=true;
       else if(r.item==='star')this.inp.useItem=true;
-      else if(r.item==='lightning')this.inp.useItem=true;
     }
     if(this.inp.useItem)r.fireItem(all,[]);
     
     if(!this._stP)this._stP=b.p.clone();
     if(Math.abs(b.spd)<5&&this.inp.throttle>0){this._stT+=dt;if(this._stT>0.8){this._revT=1;this._revDir=Math.random()>.5?-1:1;this._stT=0;}}else this._stT=0;
     
-    b.step(this.inp,dt,Track.onRoad(b.p,r.spIdx));
+    b.step(this.inp,dt,Track.onRoad(b.p,r.spIdx), r.spIdx);
   }
 }
 
@@ -1482,9 +1541,10 @@ class RampsManager {
                 const localZ = dx * Math.sin(-rm.ry) + dz * Math.cos(-rm.ry);
                 
                 if (Math.abs(localX) < 22 && Math.abs(localZ) < 18) {
-                    if (r.body.p.y > rm.pos.y + 4.0) continue; // Airborne check
-                    if (r.body.vy < 15) {
-                        r.body.vy = 35; // Smooth upward leap
+                    if (r.body.isGrounded && r.body.p.y <= rm.pos.y + 3.0 && r.body.vy <= 0) {
+                        r.body.vy = 40; // Upward leap
+                        r.body.isGrounded = false; // Detach explicitly
+                        r.body.p.y += 0.5; // Lift up immediately so it avoids immediate grounding
                         r.body.spd += 25; // Forward speed boost
                         r.body.v.x = r.body.fx * r.body.spd;
                         r.body.v.z = r.body.fz * r.body.spd;
@@ -1524,7 +1584,7 @@ class ItemBoxes{
           if(r.item || Math.abs(r.body.p.y - b.basePos.y) > 3) continue; 
           const dx=b.basePos.x-r.body.p.x,dz=b.basePos.z-r.body.p.z;
           if(dx*dx+dz*dz<16){
-              const pool=['boost','boost','missile','missile','shield','banana','banana','star','lightning'];
+              const pool=['boost','boost','missile','missile','shield','banana','banana','star'];
               r.giveItem(pool[Math.floor(Math.random()*pool.length)]);
               b.on=false;b.timer=5;b.grp.visible=false;Parts.spawnSpark(b.basePos,0xffffff,15);break;
           }
@@ -1617,9 +1677,9 @@ class ObstaclesManager {
         const norms = Track.getNorms();
         const tot = spine.length;
         
-        // High spawn rate for multiplayer chaos!
-        for (let i = Math.floor(tot * 0.1); i < tot; i += 18) {
-            if (srand() < 0.4) continue; 
+        // Spawn rate dramatically reduced for cleaner multiplayer
+        for (let i = Math.floor(tot * 0.1); i < tot; i += 40) {
+            if (srand() < 0.7) continue; 
             
             const p = spine[i];
             const nm = norms[i];
@@ -1746,24 +1806,38 @@ const Cam=(()=>{
     const fx=Math.sin(camH),fz=Math.cos(camH);
     
     // Smooth Track Y tracking! No more shaking
-    let smoothY = Track.getElevation(body.p);
-    let ty = Math.max(smoothY + 6.5, body.p.y + 3);
-    let tx=body.p.x-fx*14,tz=body.p.z-fz*14;
+    let smoothY = Track.getElevation(body.p, body.spIdx);
+    let baseTy = smoothY + 6.0;
     
-    if(shakeAmt>0){shakeAmt-=dt*4;tx+=(Math.random()-.5)*shakeAmt*2;ty+=(Math.random()-.5)*shakeAmt*2;tz+=(Math.random()-.5)*shakeAmt*2;shakeAmt=Math.max(0,shakeAmt);}
+    if (!body.isGrounded) {
+        baseTy = body.p.y + 4.5;
+    }
     
-    const lf=1-Math.exp(-dt*12);
-    cam.targetY = cam.targetY !== undefined ? lerp(cam.targetY, ty, lf) : ty;
+    let tx = body.p.x - fx * 14;
+    let tz = body.p.z - fz * 14;
+    
+    if(shakeAmt>0){
+        shakeAmt -= dt * 4;
+        tx += (Math.random() - .5) * shakeAmt * 2;
+        baseTy += (Math.random() - .5) * shakeAmt * 2;
+        tz += (Math.random() - .5) * shakeAmt * 2;
+        shakeAmt = Math.max(0, shakeAmt);
+    }
+    
+    const lfY = 1 - Math.exp(-dt * 6); // Smoother vertical tracking
+    const lfXZ = 1 - Math.exp(-dt * 10);
+    
+    cam.targetY = cam.targetY !== undefined ? lerp(cam.targetY, baseTy, lfY) : baseTy;
     cam.position.y = cam.targetY; 
     
-    cam.position.x+=(tx-cam.position.x)*lf;
-    cam.position.z+=(tz-cam.position.z)*lf;
+    cam.position.x += (tx - cam.position.x) * lfXZ;
+    cam.position.z += (tz - cam.position.z) * lfXZ;
     cam.up.set(0,1,0);
     
     if(!cam.lookTarget) cam.lookTarget = new THREE.Vector3(body.p.x+Math.sin(body.h)*10, body.p.y+1, body.p.z+Math.cos(body.h)*10);
-    cam.lookTarget.x = lerp(cam.lookTarget.x, body.p.x+Math.sin(body.h)*10, lf);
-    cam.lookTarget.y = lerp(cam.lookTarget.y, body.p.y+1, lf);
-    cam.lookTarget.z = lerp(cam.lookTarget.z, body.p.z+Math.cos(body.h)*10, lf);
+    cam.lookTarget.x = lerp(cam.lookTarget.x, body.p.x+Math.sin(body.h)*10, lfXZ);
+    cam.lookTarget.y = lerp(cam.lookTarget.y, body.p.y+1, lfXZ);
+    cam.lookTarget.z = lerp(cam.lookTarget.z, body.p.z+Math.cos(body.h)*10, lfXZ);
     cam.lookAt(cam.lookTarget);
   }
   return{init,update,shake};
@@ -1940,9 +2014,10 @@ const UI=(()=>{
     if(sv)sv.textContent=spd;
     if(arc){arc.style.strokeDashoffset=(ARC-(spd/320)*ARC).toFixed(1);arc.style.stroke=`rgb(255,${Math.round(255-(spd/320)*200)},0)`;}
     const lc=gel('hudLN'),lt=gel('hudLT');if(lc)lc.textContent=Math.min(st.lap,st.tot);if(lt)lt.textContent=st.tot;
-    const pn=gel('hudPN'),ps=gel('hudPS');
+    const pn=gel('hudPN'),ps=gel('hudPS'),pt=gel('hudPT');
     if(pn){pn.textContent=st.pos;pn.style.color=['#fbd000','#cccccc','#cd7f32','#fff'][Math.min(st.pos-1,3)];}
     if(ps)ps.textContent=['ST','ND','RD','TH'][Math.min(st.pos-1,3)]||'TH';
+    if(pt)pt.textContent='/ ' + (st.totalRacers || 1);
     const rt=gel('hudTM');if(rt)rt.textContent=fmt(st.time||0);
     const sr=gel('shieldRing');if(sr)sr.classList.toggle('on',!!st.shield);
   }
@@ -1956,8 +2031,7 @@ const UI=(()=>{
           missile:{e:'🚀',l:'MISSILE',c:'imissile'},
           shield:{e:'🛡',l:'SHIELD',c:'ishield'},
           banana:{e:'🍌',l:'BANANA',c:'ibanana'},
-          star:{e:'⭐',l:'STAR',c:'istar'},
-          lightning:{e:'🌩',l:'SHOCK',c:'ilightning'}
+          star:{e:'⭐',l:'STAR',c:'istar'}
       };
       if(t&&M[t]){if(ii)ii.textContent=M[t].e;if(il)il.textContent=M[t].l;ib.className=M[t].c;}
       else{if(ii)ii.textContent='?';if(il)il.textContent='NO ITEM';}
@@ -2296,7 +2370,7 @@ function loop(ts){
     renderNameTags();
 
     if(!isPaused && ++hudF%2===0){
-      UI.tick({spd:player.body.kmh,lap:player.lap,tot:SETTINGS_LAPS,pos:player.racePos,time:raceTime,shield:player.body.shield});
+      UI.tick({spd:player.body.kmh,lap:player.lap,tot:SETTINGS_LAPS,pos:player.racePos,totalRacers:allRacers.length,time:raceTime,shield:player.body.shield});
       MMap.draw(Object.values(remoteRacers));
     }
     if(window._raceDone){
